@@ -1,0 +1,88 @@
+@import 'tailwindcss';
+
+/* `dark:` follows data-theme when set, otherwise the system setting. */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme='light'], [data-theme='light'] *)) {
+      @slot;
+    }
+  }
+}
+
+/* Colour tokens: change here, and every utility (bg-surface, text-muted…) follows. */
+:root {
+  --bg: #ffffff;
+  --surface: #f6f7f9;
+  --fg: #1c1e21;
+  --muted: #5b616b;
+  --line: #d9dce1;
+  --accent: #4f46e5;
+  --accent-fg: #ffffff;
+  --focus: #2563eb;
+  --danger: #c62828;
+  --success: #2e7d32;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #121418;
+    --surface: #1c1f25;
+    --fg: #e8eaed;
+    --muted: #a0a6b0;
+    --line: #343941;
+    --accent: #818cf8;
+    --accent-fg: #121418;
+    --focus: #93c5fd;
+    --danger: #ef9a9a;
+    --success: #81c784;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #121418;
+  --surface: #1c1f25;
+  --fg: #e8eaed;
+  --muted: #a0a6b0;
+  --line: #343941;
+  --accent: #818cf8;
+  --accent-fg: #121418;
+  --focus: #93c5fd;
+  --danger: #ef9a9a;
+  --success: #81c784;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-focus: var(--focus);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+}
+
+@layer base {
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-3 outline-offset-2 outline-focus;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
