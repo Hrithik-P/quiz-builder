@@ -1,6 +1,5 @@
-import { Link } from 'react-router'
+import { ButtonLink } from '../ui/Button'
 import { EmptyState } from '../ui/EmptyState'
-import { buttonClass } from '../ui/styles'
 
 interface QuizUnavailableProps {
   reason: 'not-found' | 'deleted' | 'edited'
@@ -28,11 +27,7 @@ export function QuizUnavailable({ reason }: QuizUnavailableProps) {
     <EmptyState
       title={title}
       description={description}
-      action={
-        <Link to="/" className={buttonClass('primary')}>
-          Back to quizzes
-        </Link>
-      }
+      action={<ButtonLink to="/">Back to quizzes</ButtonLink>}
     />
   )
 }

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { QuizCard, QuizCardSkeleton } from '../components/quiz/QuizCard'
 import { ResumeBanner } from '../components/quiz/ResumeBanner'
+import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Skeleton } from '../components/ui/Skeleton'
-import { buttonClass, displayClass, eyebrowClass } from '../components/ui/styles'
-import { quizService } from '../services/quizService'
+import { displayClass, eyebrowClass } from '../components/ui/styles'
 import { useServiceData } from '../hooks/useServiceData'
+import { quizService } from '../services/quizService'
 import { useSessionStore } from '../store/sessionStore'
 import type { QuizSummary } from '../types/views'
 import { formatPercentage } from '../utils/format'
@@ -110,13 +111,9 @@ export function QuizListPage() {
           title="No quizzes here yet"
           description="There are no quizzes assigned to this country."
           action={
-            <button
-              type="button"
-              className={buttonClass('secondary')}
-              onClick={() => setCountry('')}
-            >
+            <Button variant="secondary" onClick={() => setCountry('')}>
               Show all countries
-            </button>
+            </Button>
           }
         />
       )}

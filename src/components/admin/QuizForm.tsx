@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { Link } from 'react-router'
 import type { Country, Question } from '../../types/models'
-import { buttonClass, cardClass, inputClass, labelClass } from '../ui/styles'
+import { Button, ButtonLink } from '../ui/Button'
+import { cardClass, inputClass, labelClass } from '../ui/styles'
 import { QuestionEditor } from './QuestionEditor'
 import { createQuestion, hasErrors, validateQuiz, type QuizDraft } from './quizDraft'
 
@@ -198,22 +198,20 @@ export function QuizForm({ initial, countries, submitLabel, onSubmit }: QuizForm
             onMove={(direction) => moveQuestion(index, direction)}
           />
         ))}
-        <button
-          type="button"
-          className={buttonClass('secondary', 'self-start')}
+        <Button
+          variant="secondary"
+          className="self-start"
           onClick={() => update('questions', [...draft.questions, createQuestion()])}
         >
           + Add question
-        </button>
+        </Button>
       </section>
 
       <div className="sticky bottom-24 z-10 flex justify-end gap-2 rounded-2xl border-2 border-edge bg-surface/95 p-3 shadow-pop backdrop-blur lg:bottom-4">
-        <Link to="/admin" className={buttonClass('secondary')}>
+        <ButtonLink to="/admin" variant="secondary">
           Cancel
-        </Link>
-        <button type="submit" className={buttonClass('primary')}>
-          {submitLabel}
-        </button>
+        </ButtonLink>
+        <Button type="submit">{submitLabel}</Button>
       </div>
     </form>
   )

@@ -4,9 +4,9 @@ import { CountdownDisplay } from '../components/quiz/CountdownDisplay'
 import { QuestionView } from '../components/quiz/QuestionView'
 import { QuizTile } from '../components/quiz/QuizTile'
 import { QuizUnavailable } from '../components/quiz/QuizUnavailable'
+import { Button } from '../components/ui/Button'
 import { ArrowRightIcon, CloseIcon } from '../components/ui/icons'
 import { ProgressBar } from '../components/ui/ProgressBar'
-import { buttonClass } from '../components/ui/styles'
 import { quizService } from '../services/quizService'
 
 /**
@@ -142,14 +142,15 @@ export function QuizAttendPage() {
             </kbd>{' '}
             to submit
           </p>
-          <button
+          <Button
             type="submit"
-            className={buttonClass('primary', 'w-full sm:w-auto', 'xl')}
+            size="xl"
+            className="w-full sm:w-auto"
             disabled={submitting || selected.length === 0}
           >
             {isLast ? 'Finish quiz' : 'Lock it in'}
             <ArrowRightIcon size={22} />
-          </button>
+          </Button>
         </div>
       </form>
     </section>

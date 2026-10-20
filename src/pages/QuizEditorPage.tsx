@@ -1,8 +1,8 @@
 import { Link, useNavigate, useParams } from 'react-router'
-import { QuizForm } from '../components/admin/QuizForm'
 import { createEmptyDraft, toDraft } from '../components/admin/quizDraft'
+import { QuizForm } from '../components/admin/QuizForm'
+import { ButtonLink } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
-import { buttonClass } from '../components/ui/styles'
 import { quizService } from '../services/quizService'
 
 /** Handles both /admin/new and /admin/:quizId/edit. */
@@ -17,11 +17,7 @@ export function QuizEditorPage() {
       <EmptyState
         title="Quiz not found"
         description="It may have been deleted."
-        action={
-          <Link to="/admin" className={buttonClass('primary')}>
-            Back to admin
-          </Link>
-        }
+        action={<ButtonLink to="/admin">Back to admin</ButtonLink>}
       />
     )
   }

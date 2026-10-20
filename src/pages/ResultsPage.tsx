@@ -1,10 +1,11 @@
 import { Link, useParams } from 'react-router'
 import { QuizTile } from '../components/quiz/QuizTile'
+import { ButtonLink } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { ArrowLeftIcon, ArrowRightIcon, LockIcon, RetryIcon } from '../components/ui/icons'
 import { Ring } from '../components/ui/Ring'
 import { StatCard } from '../components/ui/StatCard'
-import { buttonClass, displayClass } from '../components/ui/styles'
+import { displayClass } from '../components/ui/styles'
 import { quizService } from '../services/quizService'
 import { formatClock, formatPercentage } from '../utils/format'
 
@@ -27,11 +28,7 @@ export function ResultsPage() {
       <EmptyState
         title="Result not found"
         description="This attempt does not exist or has not been completed yet."
-        action={
-          <Link to="/" className={buttonClass('primary')}>
-            Back to quizzes
-          </Link>
-        }
+        action={<ButtonLink to="/">Back to quizzes</ButtonLink>}
       />
     )
   }
@@ -152,24 +149,22 @@ export function ResultsPage() {
         )}
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <Link to="/" className={buttonClass('secondary', '', 'lg')}>
+          <ButtonLink to="/" variant="secondary" size="lg">
             All quizzes
-          </Link>
+          </ButtonLink>
           {quiz?.retakesAllowed ? (
-            <Link
-              to={`/quiz/${quiz.id}`}
-              className={buttonClass('primary', 'order-first sm:order-none', 'lg')}
-            >
+            <ButtonLink to={`/quiz/${quiz.id}`} size="lg" className="order-first sm:order-none">
               <RetryIcon size={18} />
               Try again
-            </Link>
+            </ButtonLink>
           ) : (
-            <Link
+            <ButtonLink
               to={`/leaderboard/${result.quizId}`}
-              className={buttonClass('primary', 'order-first sm:order-none', 'lg')}
+              size="lg"
+              className="order-first sm:order-none"
             >
               View leaderboard
-            </Link>
+            </ButtonLink>
           )}
         </div>
       </div>

@@ -1,12 +1,13 @@
 import { Link, useNavigate, useParams } from 'react-router'
 import { LeaderboardList } from '../components/leaderboard/LeaderboardList'
 import { QuizTile } from '../components/quiz/QuizTile'
+import { ButtonLink } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { ChevronDownIcon, InfoIcon } from '../components/ui/icons'
 import { Skeleton } from '../components/ui/Skeleton'
-import { buttonClass, displayClass, eyebrowClass } from '../components/ui/styles'
-import { quizService } from '../services/quizService'
+import { displayClass, eyebrowClass } from '../components/ui/styles'
 import { useServiceData } from '../hooks/useServiceData'
+import { quizService } from '../services/quizService'
 import { useSessionStore } from '../store/sessionStore'
 
 const TOP_LIMIT = 10
@@ -81,11 +82,7 @@ export function LeaderboardPage() {
         <EmptyState
           title="No results yet"
           description="Nobody has completed this quiz. Be the first!"
-          action={
-            <Link to={`/quiz/${quiz.id}`} className={buttonClass('primary')}>
-              Take the quiz
-            </Link>
-          }
+          action={<ButtonLink to={`/quiz/${quiz.id}`}>Take the quiz</ButtonLink>}
         />
       ) : (
         <div className="flex max-w-4xl flex-col gap-3 rounded-3xl border-2 border-edge bg-surface p-3 sm:p-4">

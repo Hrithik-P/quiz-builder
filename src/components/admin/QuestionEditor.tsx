@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import type { Question, QuestionType } from '../../types/models'
-import { buttonClass, cardClass, inputClass, labelClass } from '../ui/styles'
+import { Button } from '../ui/Button'
+import { cardClass, inputClass, labelClass } from '../ui/styles'
 import { createOption, type QuestionErrors } from './quizDraft'
 
 interface QuestionEditorProps {
@@ -73,32 +74,33 @@ export function QuestionEditor({
           <h3 className="font-display text-lg font-extrabold">Question {number}</h3>
         </legend>
         <div className="flex gap-1">
-          <button
-            type="button"
-            className={buttonClass('ghost', '', 'sm')}
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onMove(-1)}
             disabled={index === 0}
             aria-label={`Move question ${number} up`}
           >
             ↑
-          </button>
-          <button
-            type="button"
-            className={buttonClass('ghost', '', 'sm')}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onMove(1)}
             disabled={index === total - 1}
             aria-label={`Move question ${number} down`}
           >
             ↓
-          </button>
-          <button
-            type="button"
-            className={buttonClass('ghost', 'text-danger', 'sm')}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-danger"
             onClick={onRemove}
             aria-label={`Remove question ${number}`}
           >
             Remove
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -160,26 +162,27 @@ export function QuestionEditor({
                 onChange={(event) => setOptionText(option.id, event.target.value)}
                 aria-label={`Option ${optionIndex + 1} text`}
               />
-              <button
-                type="button"
-                className={buttonClass('ghost', 'shrink-0', 'sm')}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0"
                 onClick={() => removeOption(option.id)}
                 aria-label={`Remove option ${optionIndex + 1}`}
               >
                 ✕
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
         <FieldError id={`${baseId}-options-error`} message={errors?.options} />
         <FieldError id={`${baseId}-correct-error`} message={errors?.correct} />
-        <button
-          type="button"
-          className={buttonClass('secondary', 'mt-3')}
+        <Button
+          variant="secondary"
+          className="mt-3"
           onClick={() => onChange({ ...question, options: [...question.options, createOption()] })}
         >
           + Add option
-        </button>
+        </Button>
       </div>
     </fieldset>
   )

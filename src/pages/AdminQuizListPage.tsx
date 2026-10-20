@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
 import { Badge } from '../components/ui/Badge'
+import { Button, ButtonLink } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { EmptyState } from '../components/ui/EmptyState'
-import { buttonClass, cardClass, inputClass, labelClass } from '../components/ui/styles'
+import { cardClass, inputClass, labelClass } from '../components/ui/styles'
 import { quizService } from '../services/quizService'
 import type { Quiz } from '../types/models'
 import { formatTimeLimit } from '../utils/format'
@@ -52,9 +52,7 @@ export function AdminQuizListPage() {
         >
           Manage quizzes
         </h1>
-        <Link to="/admin/new" className={buttonClass('primary')}>
-          + New quiz
-        </Link>
+        <ButtonLink to="/admin/new">+ New quiz</ButtonLink>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-[1fr_14rem]">
@@ -127,21 +125,22 @@ export function AdminQuizListPage() {
                 </ul>
               </div>
               <div className="flex gap-2">
-                <Link
+                <ButtonLink
                   to={`/admin/${quiz.id}/edit`}
-                  className={buttonClass('secondary', 'flex-1 md:flex-none')}
+                  variant="secondary"
+                  className="flex-1 md:flex-none"
                   aria-label={`Edit ${quiz.title}`}
                 >
                   Edit
-                </Link>
-                <button
-                  type="button"
-                  className={buttonClass('ghost', 'flex-1 text-danger md:flex-none')}
+                </ButtonLink>
+                <Button
+                  variant="ghost"
+                  className="flex-1 text-danger md:flex-none"
                   onClick={() => setPendingDelete(quiz)}
                   aria-label={`Delete ${quiz.title}`}
                 >
                   Delete
-                </button>
+                </Button>
               </div>
             </li>
           ))}
@@ -150,25 +149,23 @@ export function AdminQuizListPage() {
 
       {pageCount > 1 && (
         <nav aria-label="Pagination" className="flex items-center justify-between gap-2">
-          <button
-            type="button"
-            className={buttonClass('secondary')}
+          <Button
+            variant="secondary"
             disabled={currentPage === 1}
             onClick={() => setPage(currentPage - 1)}
           >
             Previous
-          </button>
+          </Button>
           <span className="text-sm text-muted" aria-live="polite">
             Page {currentPage} of {pageCount}
           </span>
-          <button
-            type="button"
-            className={buttonClass('secondary')}
+          <Button
+            variant="secondary"
             disabled={currentPage === pageCount}
             onClick={() => setPage(currentPage + 1)}
           >
             Next
-          </button>
+          </Button>
         </nav>
       )}
 

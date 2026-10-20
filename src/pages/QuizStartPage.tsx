@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router'
 import { QuizUnavailable } from '../components/quiz/QuizUnavailable'
+import { ButtonLink } from '../components/ui/Button'
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -9,7 +10,7 @@ import {
   PodiumIcon,
 } from '../components/ui/icons'
 import { StatCard } from '../components/ui/StatCard'
-import { buttonClass, displayClass, eyebrowClass } from '../components/ui/styles'
+import { displayClass, eyebrowClass } from '../components/ui/styles'
 import { quizService } from '../services/quizService'
 import { useSessionStore } from '../store/sessionStore'
 import { formatClock, formatPercentage, formatSeconds } from '../utils/format'
@@ -82,15 +83,12 @@ export function QuizStartPage() {
               <StatCard label="Time" value={formatClock(priorResult.timeTakenSeconds)} />
             </dl>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Link
-                to={`/results/${priorResult.attemptId}`}
-                className={buttonClass('primary', '', 'lg')}
-              >
+              <ButtonLink to={`/results/${priorResult.attemptId}`} size="lg">
                 View result
-              </Link>
-              <Link to={`/leaderboard/${quiz.id}`} className={buttonClass('secondary', '', 'lg')}>
+              </ButtonLink>
+              <ButtonLink to={`/leaderboard/${quiz.id}`} variant="secondary" size="lg">
                 Leaderboard
-              </Link>
+              </ButtonLink>
             </div>
           </>
         ) : (
@@ -146,13 +144,10 @@ export function QuizStartPage() {
             </div>
 
             <div className="flex flex-col items-stretch gap-2">
-              <Link
-                to={`/quiz/${quiz.id}/attempt/${inProgress?.id ?? 'new'}`}
-                className={buttonClass('primary', '', 'xl')}
-              >
+              <ButtonLink to={`/quiz/${quiz.id}/attempt/${inProgress?.id ?? 'new'}`} size="xl">
                 {inProgress ? 'Resume quiz' : 'Start quiz'}
                 <ArrowRightIcon size={22} />
-              </Link>
+              </ButtonLink>
               <Link
                 to={`/leaderboard/${quiz.id}`}
                 className="inline-flex min-h-11 items-center justify-center font-bold"

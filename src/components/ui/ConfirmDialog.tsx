@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
-import { buttonClass } from './styles'
+import { Button } from './Button'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -48,12 +48,12 @@ export function ConfirmDialog({
         {message}
       </p>
       <div className="mt-6 flex justify-end gap-2">
-        <button type="button" className={buttonClass('secondary')} onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           Cancel
-        </button>
-        <button type="button" className={buttonClass('danger')} onClick={onConfirm}>
+        </Button>
+        <Button variant="danger" onClick={onConfirm}>
           {confirmLabel}
-        </button>
+        </Button>
       </div>
     </dialog>
   )
