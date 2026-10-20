@@ -2,9 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='28' height='28' rx='8' fill='%23ffd43b' stroke='%231e1b4b' stroke-width='3'/%3E%3Ctext x='16' y='22' font-family='sans-serif' font-weight='800' font-size='16' text-anchor='middle' fill='%231e1b4b'%3E%3F%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quiz Platform</title>
+    <title>Pop Quiz</title>
+    <script>
+      // Apply the saved theme before first paint (key matches THEME_STORAGE_KEY).
+      try {
+        const theme = JSON.parse(localStorage.getItem('quiz-theme'))?.state?.theme
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme
+      } catch {
+        // Storage blocked or corrupt: fall back to the system setting.
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

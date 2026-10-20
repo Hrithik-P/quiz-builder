@@ -1,8 +1,13 @@
 import { createBrowserRouter } from 'react-router'
-import { Layout } from './Layout'
-import { QuizListPage } from '../pages/QuizListPage'
+import { AdminQuizListPage } from '../pages/AdminQuizListPage'
+import { LeaderboardPage } from '../pages/LeaderboardPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
-import { Placeholder } from '../pages/Placeholder'
+import { QuizAttendPage } from '../pages/QuizAttendPage'
+import { QuizEditorPage } from '../pages/QuizEditorPage'
+import { QuizListPage } from '../pages/QuizListPage'
+import { QuizStartPage } from '../pages/QuizStartPage'
+import { ResultsPage } from '../pages/ResultsPage'
+import { Layout, type RouteHandle } from './Layout'
 
 export const router = createBrowserRouter([
   {
@@ -10,13 +15,17 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <QuizListPage /> },
-      { path: 'quiz/:quizId', element: <Placeholder title="Quiz start" /> },
-      { path: 'quiz/:quizId/attempt/:attemptId', element: <Placeholder title="Quiz attend" /> },
-      { path: 'results/:attemptId', element: <Placeholder title="Results" /> },
-      { path: 'leaderboard/:quizId?', element: <Placeholder title="Leaderboard" /> },
-      { path: 'admin', element: <Placeholder title="Quiz admin" /> },
-      { path: 'admin/new', element: <Placeholder title="New quiz" /> },
-      { path: 'admin/:quizId/edit', element: <Placeholder title="Edit quiz" /> },
+      { path: 'quiz/:quizId', element: <QuizStartPage /> },
+      {
+        path: 'quiz/:quizId/attempt/:attemptId',
+        element: <QuizAttendPage />,
+        handle: { focusMode: true } satisfies RouteHandle,
+      },
+      { path: 'results/:attemptId', element: <ResultsPage /> },
+      { path: 'leaderboard/:quizId?', element: <LeaderboardPage /> },
+      { path: 'admin', element: <AdminQuizListPage /> },
+      { path: 'admin/new', element: <QuizEditorPage /> },
+      { path: 'admin/:quizId/edit', element: <QuizEditorPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

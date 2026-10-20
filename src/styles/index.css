@@ -12,47 +12,78 @@
   }
 }
 
-/* Colour tokens: change here, and every utility (bg-surface, text-muted…) follows. */
+/* Colour tokens ("Pop Quiz"): change here, and every utility (bg-surface, text-muted…) follows. */
 :root {
-  --bg: #ffffff;
-  --surface: #f6f7f9;
-  --fg: #1c1e21;
-  --muted: #5b616b;
-  --line: #d9dce1;
-  --accent: #4f46e5;
+  --bg: #f3eeff;
+  --surface: #ffffff;
+  --fg: #1e1b4b;
+  --muted: #5b5885;
+  --line: #ddd3f0;
+  --accent: #7c3aed;
   --accent-fg: #ffffff;
-  --focus: #2563eb;
-  --danger: #c62828;
-  --success: #2e7d32;
+  --focus: #db2777;
+  --danger: #dc2626;
+  --success: #15803d;
+  /* Chunky outlines and the hard offset shadow behind cards and buttons. */
+  --edge: #1e1b4b;
+  --shadow: #1e1b4b;
+  /* The dark ink panel (nav, results hero) and its text. */
+  --panel: #1e1b4b;
+  --panel-fg: #ffffff;
+  --panel-muted: #cfc8f5;
+  /* Per-quiz colours. They stay bright in both themes, so text on them is always ink. */
+  --tile-fg: #1e1b4b;
+  --tile-1: #ff9f7a;
+  --tile-2: #f9a8d4;
+  --tile-3: #ffd43b;
+  --tile-4: #7dd3fc;
+  --tile-5: #b9f35b;
   color-scheme: light dark;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #121418;
-    --surface: #1c1f25;
-    --fg: #e8eaed;
-    --muted: #a0a6b0;
-    --line: #343941;
-    --accent: #818cf8;
-    --accent-fg: #121418;
-    --focus: #93c5fd;
-    --danger: #ef9a9a;
-    --success: #81c784;
+    --bg: #120f24;
+    --surface: #1c1834;
+    --fg: #ede9fe;
+    --muted: #a5a1c8;
+    --line: #362f5e;
+    --accent: #a78bfa;
+    --accent-fg: #120f24;
+    --focus: #f472b6;
+    --danger: #f87171;
+    --success: #4ade80;
+    --edge: #6d64c4;
+    --shadow: #05030f;
+    --panel: #251f4d;
+    --panel-fg: #ffffff;
+    --panel-muted: #cfc8f5;
+    color-scheme: dark;
   }
 }
 
+/* Native controls (radios, selects, scrollbars) follow the forced theme too. */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
 :root[data-theme='dark'] {
-  --bg: #121418;
-  --surface: #1c1f25;
-  --fg: #e8eaed;
-  --muted: #a0a6b0;
-  --line: #343941;
-  --accent: #818cf8;
-  --accent-fg: #121418;
-  --focus: #93c5fd;
-  --danger: #ef9a9a;
-  --success: #81c784;
+  color-scheme: dark;
+  --bg: #120f24;
+  --surface: #1c1834;
+  --fg: #ede9fe;
+  --muted: #a5a1c8;
+  --line: #362f5e;
+  --accent: #a78bfa;
+  --accent-fg: #120f24;
+  --focus: #f472b6;
+  --danger: #f87171;
+  --success: #4ade80;
+  --edge: #6d64c4;
+  --shadow: #05030f;
+  --panel: #251f4d;
+  --panel-fg: #ffffff;
+  --panel-muted: #cfc8f5;
 }
 
 @theme inline {
@@ -66,6 +97,36 @@
   --color-focus: var(--focus);
   --color-danger: var(--danger);
   --color-success: var(--success);
+  --color-edge: var(--edge);
+  --color-panel: var(--panel);
+  --color-panel-fg: var(--panel-fg);
+  --color-panel-muted: var(--panel-muted);
+  --color-tile-fg: var(--tile-fg);
+  --color-tile-1: var(--tile-1);
+  --color-tile-2: var(--tile-2);
+  --color-tile-3: var(--tile-3);
+  --color-tile-4: var(--tile-4);
+  --color-tile-5: var(--tile-5);
+
+  --shadow-pop-sm: 2px 2px 0 var(--shadow);
+  --shadow-pop: 4px 4px 0 var(--shadow);
+  --shadow-pop-lg: 6px 6px 0 var(--shadow);
+
+  --font-sans: 'Figtree', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Figtree', ui-sans-serif, system-ui, sans-serif;
+
+  --animate-question-in: question-in 250ms ease-out;
+
+  @keyframes question-in {
+    from {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
 }
 
 @layer base {
