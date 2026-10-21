@@ -6,6 +6,7 @@ import { QuizListPage } from '../pages/QuizListPage'
 import { QuizStartPage } from '../pages/QuizStartPage'
 import { ResultsPage } from '../pages/ResultsPage'
 import { Layout, type RouteHandle } from './Layout'
+import { RouteErrorPage } from './RouteErrorPage'
 import { RouteFallback } from './RouteFallback'
 
 /**
@@ -29,23 +30,33 @@ const adminRoutes: RouteObject[] = [
   },
 ]
 
+/**
+ * Two error boundaries. The inner one wraps the screens, so a crash there is shown inside the app
+ * shell and the navigation keeps working. The outer one catches a failure in the shell itself.
+ */
 export const routes: RouteObject[] = [
   {
     path: '/',
     element: <Layout />,
     HydrateFallback: RouteFallback,
+    ErrorBoundary: RouteErrorPage,
     children: [
-      { index: true, element: <QuizListPage /> },
-      { path: 'quiz/:quizId', element: <QuizStartPage /> },
       {
-        path: 'quiz/:quizId/attempt/:attemptId',
-        element: <QuizAttendPage />,
-        handle: { focusMode: true } satisfies RouteHandle,
+        ErrorBoundary: RouteErrorPage,
+        children: [
+          { index: true, element: <QuizListPage /> },
+          { path: 'quiz/:quizId', element: <QuizStartPage /> },
+          {
+            path: 'quiz/:quizId/attempt/:attemptId',
+            element: <QuizAttendPage />,
+            handle: { focusMode: true } satisfies RouteHandle,
+          },
+          { path: 'results/:attemptId', element: <ResultsPage /> },
+          { path: 'leaderboard/:quizId?', element: <LeaderboardPage /> },
+          ...adminRoutes,
+          { path: '*', element: <NotFoundPage /> },
+        ],
       },
-      { path: 'results/:attemptId', element: <ResultsPage /> },
-      { path: 'leaderboard/:quizId?', element: <LeaderboardPage /> },
-      ...adminRoutes,
-      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]
