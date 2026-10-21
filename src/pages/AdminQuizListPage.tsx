@@ -2,14 +2,19 @@ import { Link } from 'react-router'
 import { useState } from 'react'
 import { AdminQuizFilters } from '../components/admin/AdminQuizFilters'
 import { AdminQuizRow } from '../components/admin/AdminQuizRow'
+import { ImportOutcomeNotice } from '../components/admin/ImportOutcomeNotice'
+import { QuizTransferButtons } from '../components/admin/QuizTransferButtons'
+import { getExportFilename, serializeQuizzes } from '../components/admin/quizTransfer'
 import { searchAndSortQuizzes, type QuizSortKey } from '../components/admin/quizSort'
 import { Button } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
 import { Pagination } from '../components/ui/Pagination'
+import { useQuizImport } from '../hooks/useQuizImport'
 import { useQuizData, useQuizStore } from '../store/quizStore'
 import type { Quiz } from '../types/models'
+import { downloadTextFile } from '../utils/downloadFile'
 import { paginate } from '../utils/paginate'
 
 const PAGE_SIZE = 4
@@ -23,6 +28,7 @@ export function AdminQuizListPage() {
   const [page, setPage] = useState(1)
   const [pendingDelete, setPendingDelete] = useState<Quiz | null>(null)
   const [isResetOpen, setIsResetOpen] = useState(false)
+  const { outcome, importFile, dismissOutcome } = useQuizImport()
 
   const pagination = paginate(searchAndSortQuizzes(quizzes, search, sort), page, PAGE_SIZE)
   const visible = pagination.items
@@ -31,6 +37,21 @@ export function AdminQuizListPage() {
     if (!pendingDelete) return
     deleteQuiz(pendingDelete.id)
     setPendingDelete(null)
+  }
+
+  function handleExport() {
+    const exportedAt = new Date()
+    downloadTextFile(
+      getExportFilename(exportedAt),
+      serializeQuizzes(quizzes, exportedAt),
+      'application/json',
+    )
+  }
+
+  async function handleImportFile(file: File) {
+    const result = await importFile(file)
+    // New quizzes are mixed into the sorted list, so go back to the start to find them.
+    if (result.status === 'imported') setPage(1)
   }
 
   function confirmReset() {
@@ -47,6 +68,11 @@ export function AdminQuizListPage() {
         title="Manage quizzes"
         actions={
           <div className="flex flex-wrap gap-2 self-start lg:self-auto">
+            <QuizTransferButtons
+              canExport={quizzes.length > 0}
+              onExport={handleExport}
+              onImportFile={handleImportFile}
+            />
             <Button variant="secondary" onClick={() => setIsResetOpen(true)}>
               Reset data
             </Button>
@@ -56,6 +82,8 @@ export function AdminQuizListPage() {
           </div>
         }
       />
+
+      <ImportOutcomeNotice outcome={outcome} onDismiss={dismissOutcome} />
 
       <AdminQuizFilters
         search={search}
