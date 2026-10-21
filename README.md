@@ -237,3 +237,24 @@ answer's time (or `startedAt`) plus `perQuestionSeconds`.
 - If a tab is in the background when a question's time runs out, the browser may delay the timer
   past the grace window, and the question is then recorded as unanswered instead of with the
   selected option.
+
+## 6. Screenshots
+
+Desktop, light theme, on the seed data (current user: Aarav Menon).
+
+**Quiz list:** the in-progress attempt to resume, completed quizzes with their best or final
+score, and the country filter.
+
+![Quiz list](public/Screenshot%20from%202026-10-21%2018-13-34.png)
+
+**Leaderboard:** best attempt per player, ties to the faster finish, current user highlighted.
+
+![Leaderboard](public/Screenshot%20from%202026-10-21%2018-14-05.png)
+
+**Admin list:** search, sort, pagination, import, export and reset.
+
+![Admin quiz list](public/Screenshot%20from%202026-10-21%2018-13-43.png)
+
+**Quiz builder:** the shared add/edit form with time limits, retakes, countries and questions.
+
+![New quiz form](public/Screenshot%20from%202026-10-21%2018-13-53.png)
