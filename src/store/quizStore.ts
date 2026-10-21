@@ -221,6 +221,9 @@ export const useQuizStore = create<QuizStore>()(
   ),
 )
 
+// `persist` only saves when state changes. Write the seed once so storage holds it from the first load.
+if (localStorage.getItem(QUIZ_STORAGE_KEY) === null) useQuizStore.setState({})
+
 /** The stored data for rendering. Re-renders the caller whenever any of it changes. */
 export function useQuizData(): QuizData {
   return useQuizStore(

@@ -369,6 +369,17 @@ describe('admin changes', () => {
 })
 
 describe('persistence', () => {
+  it('copies the seed into localStorage on first load', async () => {
+    localStorage.clear()
+    vi.resetModules()
+    const { useQuizStore: freshStore, QUIZ_STORAGE_KEY: key } =
+      await import('../../store/quizStore')
+
+    const saved = JSON.parse(localStorage.getItem(key) ?? '{}') as { state?: { quizzes?: Quiz[] } }
+    expect(saved.state?.quizzes).toHaveLength(5)
+    expect(freshStore.getState().quizzes).toHaveLength(5)
+  })
+
   function savedState(): Record<string, unknown> {
     const raw = localStorage.getItem(QUIZ_STORAGE_KEY)
     return (JSON.parse(raw ?? '{}') as { state?: Record<string, unknown> }).state ?? {}
