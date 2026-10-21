@@ -7,7 +7,8 @@ import { PageHeader } from '../components/ui/PageHeader'
 import { Skeleton } from '../components/ui/Skeleton'
 import { ToggleGroup, ToggleGroupItem } from '../components/ui/ToggleGroup'
 import { useServiceData } from '../hooks/useServiceData'
-import { quizService } from '../services/quizService'
+import { getInProgressAttempt, getQuizzes } from '../services/quizQueries'
+import { useQuizData } from '../store/quizStore'
 import { useSessionStore } from '../store/sessionStore'
 import type { QuizSummary } from '../types/views'
 import { formatPercentage } from '../utils/format'
@@ -24,20 +25,22 @@ function progressLine(quizzes: QuizSummary[]): string {
 
 export function QuizListPage() {
   const userId = useSessionStore((state) => state.userId)
+  const quizData = useQuizData()
   const [country, setCountry] = useState('')
   const countryOptions = [
     { value: ALL, label: 'All' },
-    ...quizService
-      .getCountries()
-      .map((countryOption) => ({ value: countryOption.code, label: countryOption.name })),
+    ...quizData.countries.map((countryOption) => ({
+      value: countryOption.code,
+      label: countryOption.name,
+    })),
   ]
-  const firstName = quizService.getUser(userId)?.name.split(' ')[0] ?? 'there'
-  const { data: quizzes, loading } = useServiceData(`${userId}:${country}`, () =>
-    quizService.getQuizzes(userId, country || undefined),
+  const firstName = quizData.users.find((user) => user.id === userId)?.name.split(' ')[0] ?? 'there'
+  const { data: quizzes, loading } = useServiceData(`${userId}:${country}`, (data) =>
+    getQuizzes(data, userId, country || undefined),
   )
 
   const resumable = quizzes
-    ?.map((quiz) => ({ quiz, attempt: quizService.getInProgressAttempt(quiz.id, userId) }))
+    ?.map((quiz) => ({ quiz, attempt: getInProgressAttempt(quizData, quiz.id, userId) }))
     .find((entry) => entry.attempt !== undefined)
   const rest = quizzes?.filter((quiz) => quiz.id !== resumable?.quiz.id) ?? []
 

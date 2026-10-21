@@ -167,7 +167,7 @@ export const useQuizStore = create<QuizStore>()(
           get().refreshAttempt(attemptId)
           const nowMs = Date.now()
           const { attempt, quiz } = findAttemptWithQuiz(attemptId)
-          const current = getCurrentQuestion(get(), attemptId, nowMs)
+          const current = getCurrentQuestion(get(), attemptId)
           if (current.status !== 'question' || !attempt || !quiz) return current
 
           const question = quiz.questions[attempt.answers.length]
@@ -184,7 +184,7 @@ export const useQuizStore = create<QuizStore>()(
             updated = finalizeAttempt(updated, quiz, answeredAtMs)
           }
           replaceAttempt(updated)
-          return getCurrentQuestion(get(), attemptId, nowMs)
+          return getCurrentQuestion(get(), attemptId)
         },
 
         completeAttempt: (attemptId) => {

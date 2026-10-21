@@ -5,13 +5,16 @@ import { BackLink } from '../components/ui/BackLink'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
-import { quizService } from '../services/quizService'
+import { useQuizData, useQuizStore } from '../store/quizStore'
 
 /** Handles both /admin/new and /admin/:quizId/edit. */
 export function QuizEditorPage() {
   const { quizId } = useParams()
   const navigate = useNavigate()
-  const quiz = quizId ? quizService.getQuiz(quizId) : undefined
+  const { countries, quizzes } = useQuizData()
+  const createQuiz = useQuizStore((state) => state.createQuiz)
+  const updateQuiz = useQuizStore((state) => state.updateQuiz)
+  const quiz = quizzes.find((candidate) => candidate.id === quizId)
   const isEdit = quizId !== undefined
 
   if (isEdit && !quiz) {
@@ -39,10 +42,13 @@ export function QuizEditorPage() {
       <QuizForm
         key={quizId ?? 'new'}
         initial={quiz ? toDraft(quiz) : createEmptyDraft()}
-        countries={quizService.getCountries()}
+        countries={countries}
         submitLabel={quiz ? 'Save changes' : 'Create quiz'}
-        // TODO: call createQuiz / updateQuiz once the data service exists.
-        onSubmit={() => navigate('/admin')}
+        onSubmit={(draft) => {
+          if (quizId) updateQuiz(quizId, draft)
+          else createQuiz(draft)
+          navigate('/admin')
+        }}
       />
     </section>
   )

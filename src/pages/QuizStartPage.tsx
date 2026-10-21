@@ -7,19 +7,22 @@ import { QuizRules } from '../components/quiz/QuizRules'
 import { QuizUnavailable } from '../components/quiz/QuizUnavailable'
 import { Button } from '../components/ui/Button'
 import { Notice } from '../components/ui/Notice'
-import { quizService } from '../services/quizService'
+import { NEW_ATTEMPT_ID } from '../hooks/useQuizAttempt'
+import { getBestResult, getInProgressAttempt, getQuizSummary } from '../services/quizQueries'
+import { useQuizData } from '../store/quizStore'
 import { useSessionStore } from '../store/sessionStore'
 import { formatPercentage } from '../utils/format'
 
 export function QuizStartPage() {
   const { quizId = '' } = useParams()
   const userId = useSessionStore((state) => state.userId)
-  const quiz = quizService.getQuizSummary(quizId, userId)
+  const quizData = useQuizData()
+  const quiz = getQuizSummary(quizData, quizId, userId)
 
   if (!quiz) return <QuizUnavailable reason="not-found" />
 
-  const inProgress = quizService.getInProgressAttempt(quiz.id, userId)
-  const priorResult = quizService.getBestResult(quiz.id, userId)
+  const inProgress = getInProgressAttempt(quizData, quiz.id, userId)
+  const priorResult = getBestResult(quizData, quiz.id, userId)
   const locked = quiz.completed && !quiz.retakesAllowed
 
   return (
@@ -53,7 +56,7 @@ export function QuizStartPage() {
             />
             <div className="flex flex-col items-stretch gap-2">
               <Button asChild size="xl">
-                <Link to={`/quiz/${quiz.id}/attempt/${inProgress?.id ?? 'new'}`}>
+                <Link to={`/quiz/${quiz.id}/attempt/${inProgress?.id ?? NEW_ATTEMPT_ID}`}>
                   {inProgress ? 'Resume quiz' : 'Start quiz'}
                   <ArrowRightIcon size={22} />
                 </Link>

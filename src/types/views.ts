@@ -41,7 +41,6 @@ export interface TimerInfo {
   /** ISO timestamp. The UI derives the live countdown from this, not from a counter. */
   endsAt: string
   totalSeconds: number
-  remainingSeconds: number
 }
 
 export type AttemptState =

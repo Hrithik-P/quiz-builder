@@ -4,7 +4,7 @@ import { LayoutGridIcon, PencilIcon, TrophyIcon } from 'lucide-react'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { UserSwitcher } from '../components/ui/UserSwitcher'
 import { useApplyTheme } from '../hooks/useApplyTheme'
-import { quizService } from '../services/quizService'
+import { useQuizData } from '../store/quizStore'
 import { useSessionStore } from '../store/sessionStore'
 
 /** Route handle: hides the app nav (the attempt screen uses it). */
@@ -36,7 +36,7 @@ function Brand({ onPanel = false }: { onPanel?: boolean }) {
 export function Layout() {
   const userId = useSessionStore((state) => state.userId)
   const setUserId = useSessionStore((state) => state.setUserId)
-  const users = quizService.getUsers()
+  const { users } = useQuizData()
   const focusMode = useMatches().some(
     (match) => (match.handle as RouteHandle | undefined)?.focusMode,
   )

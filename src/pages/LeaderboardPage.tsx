@@ -6,7 +6,8 @@ import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
 import { useServiceData } from '../hooks/useServiceData'
-import { quizService } from '../services/quizService'
+import { getLeaderboard } from '../services/quizQueries'
+import { useQuizData } from '../store/quizStore'
 import { useSessionStore } from '../store/sessionStore'
 
 const TOP_LIMIT = 10
@@ -15,10 +16,10 @@ export function LeaderboardPage() {
   const params = useParams()
   const navigate = useNavigate()
   const userId = useSessionStore((state) => state.userId)
-  const quizzes = quizService.getAllQuizzes()
+  const { quizzes } = useQuizData()
   const quizId = params.quizId ?? quizzes[0]?.id ?? ''
   const quiz = quizzes.find((quiz) => quiz.id === quizId)
-  const { data: ranked, loading } = useServiceData(quizId, () => quizService.getLeaderboard(quizId))
+  const { data: ranked, loading } = useServiceData(quizId, (data) => getLeaderboard(data, quizId))
 
   return (
     <section aria-labelledby="leaderboard-heading" className="flex flex-col gap-6 sm:gap-8">

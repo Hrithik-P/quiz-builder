@@ -6,15 +6,17 @@ import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Notice } from '../components/ui/Notice'
 import { StatGrid } from '../components/ui/StatGrid'
-import { quizService } from '../services/quizService'
+import { getLeaderboard, getQuizInfo, getResult } from '../services/quizQueries'
+import { useQuizData } from '../store/quizStore'
 import { useSessionStore } from '../store/sessionStore'
 import { formatClock } from '../utils/format'
 
 export function ResultsPage() {
   const { attemptId = '' } = useParams()
   const userId = useSessionStore((state) => state.userId)
-  const result = quizService.getResult(attemptId)
-  const quiz = result && quizService.getQuiz(result.quizId)
+  const quizData = useQuizData()
+  const result = getResult(quizData, attemptId)
+  const quiz = result && getQuizInfo(quizData, result.quizId)
 
   if (!result) {
     return (
@@ -30,7 +32,7 @@ export function ResultsPage() {
     )
   }
 
-  const leaderboard = quizService.getLeaderboard(result.quizId)
+  const leaderboard = getLeaderboard(quizData, result.quizId)
   const quizTitle = quiz?.title ?? 'Quiz'
 
   return (

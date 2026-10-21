@@ -108,21 +108,16 @@ export function getLeaderboard(data: QuizData, quizId: string, limit?: number): 
   return rankAttempts(quizAttempts, data.users).slice(0, limit)
 }
 
-function toTimerInfo(
-  endsAtMs: number | null,
-  totalSeconds: number | null,
-  nowMs: number,
-): TimerInfo | null {
+function toTimerInfo(endsAtMs: number | null, totalSeconds: number | null): TimerInfo | null {
   if (endsAtMs === null || totalSeconds === null) return null
-  return {
-    endsAt: new Date(endsAtMs).toISOString(),
-    totalSeconds,
-    remainingSeconds: Math.max(0, Math.ceil((endsAtMs - nowMs) / 1000)),
-  }
+  return { endsAt: new Date(endsAtMs).toISOString(), totalSeconds }
 }
 
-/** What the attend screen shows for an attempt right now, without the correct answers. */
-export function getCurrentQuestion(data: QuizData, attemptId: string, nowMs: number): AttemptState {
+/**
+ * What the attend screen shows for an attempt, without the correct answers. Remaining time is not
+ * included: the screen derives it from each timer's `endsAt` and the clock.
+ */
+export function getCurrentQuestion(data: QuizData, attemptId: string): AttemptState {
   const attempt = data.attempts.find((candidate) => candidate.id === attemptId)
   if (!attempt) return { status: 'not_found' }
   if (attempt.status === 'completed') return { status: 'completed', attemptId }
@@ -143,8 +138,8 @@ export function getCurrentQuestion(data: QuizData, attemptId: string, nowMs: num
     index: attempt.answers.length,
     total: quiz.questions.length,
     timers: {
-      overall: toTimerInfo(overallEndsAtMs, quiz.timeLimitSeconds, nowMs),
-      question: toTimerInfo(questionEndsAtMs, quiz.perQuestionSeconds, nowMs),
+      overall: toTimerInfo(overallEndsAtMs, quiz.timeLimitSeconds),
+      question: toTimerInfo(questionEndsAtMs, quiz.perQuestionSeconds),
     },
   }
 }

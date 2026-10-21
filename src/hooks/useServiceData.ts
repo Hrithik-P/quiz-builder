@@ -1,19 +1,24 @@
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQuizData } from '../store/quizStore'
+import type { QuizData } from '../types/models'
 
-/** Loads after a simulated delay so loading states show. Reloads when `key` changes. */
-export function useServiceData<Data>(
+/**
+ * Reads from the store, but shows a loading state for `delayMs` the first time `key` is seen (the
+ * simulated delay). Later changes to the data show up straight away, with no loading flash.
+ */
+export function useServiceData<Result>(
   key: string,
-  load: () => Data,
+  read: (data: QuizData) => Result,
   delayMs = 500,
-): { data: Data | undefined; loading: boolean } {
-  const [state, setState] = useState<{ key: string; data: Data } | null>(null)
-  const onLoaded = useEffectEvent(() => setState({ key, data: load() }))
+): { data: Result | undefined; loading: boolean } {
+  const quizData = useQuizData()
+  const [readyKey, setReadyKey] = useState<string | null>(null)
 
   useEffect(() => {
-    const timer = setTimeout(() => onLoaded(), delayMs)
+    const timer = setTimeout(() => setReadyKey(key), delayMs)
     return () => clearTimeout(timer)
   }, [key, delayMs])
 
-  const loading = state?.key !== key
-  return { data: loading ? undefined : state.data, loading }
+  const loading = readyKey !== key
+  return { data: loading ? undefined : read(quizData), loading }
 }

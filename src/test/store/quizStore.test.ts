@@ -55,7 +55,7 @@ function startAttempt(quizId: string, userId: string) {
 }
 
 function currentQuestion(attemptId: string) {
-  const state = getCurrentQuestion(store(), attemptId, Date.now())
+  const state = getCurrentQuestion(store(), attemptId)
   if (state.status !== 'question') throw new Error(`Expected a question, got ${state.status}`)
   return state
 }
@@ -149,14 +149,15 @@ describe('seed attempt that has run out of time', () => {
     setNow('2026-10-16T09:01:00Z')
     const state = currentQuestion('a11')
     expect(state).toMatchObject({ index: 2, total: 5 })
-    expect(state.timers.overall?.remainingSeconds).toBe(180)
+    // Started 09:00:00 with a 240 s limit, so the quiz ends at 09:04:00.
+    expect(state.timers.overall).toEqual({ endsAt: '2026-10-16T09:04:00.000Z', totalSeconds: 240 })
   })
 
   it('is completed when it is resumed after its time limit', () => {
     const resumed = startAttempt('q3', 'u1')
 
     expect(resumed).toMatchObject({ id: 'a11', status: 'completed' })
-    expect(getCurrentQuestion(store(), 'a11', Date.now())).toEqual({
+    expect(getCurrentQuestion(store(), 'a11')).toEqual({
       status: 'completed',
       attemptId: 'a11',
     })
@@ -220,7 +221,7 @@ describe('taking a quiz', () => {
       answerCorrectly('q4', attempt.id)
     }
 
-    expect(getCurrentQuestion(store(), attempt.id, Date.now())).toEqual({
+    expect(getCurrentQuestion(store(), attempt.id)).toEqual({
       status: 'completed',
       attemptId: attempt.id,
     })
@@ -276,7 +277,7 @@ describe('taking a quiz', () => {
 
   it('returns nothing for an attempt that does not exist', () => {
     expect(store().completeAttempt('missing')).toBeUndefined()
-    expect(getCurrentQuestion(store(), 'missing', Date.now())).toEqual({ status: 'not_found' })
+    expect(getCurrentQuestion(store(), 'missing')).toEqual({ status: 'not_found' })
   })
 })
 
@@ -310,7 +311,8 @@ describe('per-question time limit (q2, 30 seconds each)', () => {
 
     const state = currentQuestion(attempt.id)
     expect(state.index).toBe(3)
-    expect(state.timers.question?.remainingSeconds).toBe(20)
+    // Question 3 started at the 90 s mark and gets 30 s, so it ends 20 s from now.
+    expect(Date.parse(state.timers.question?.endsAt ?? '') - Date.now()).toBe(20_000)
   })
 })
 
@@ -319,7 +321,7 @@ describe('quiz changed during an attempt', () => {
     const attempt = startAttempt('q1', 'u5')
     store().updateQuiz('q1', toInput(getFullQuiz('q1')))
 
-    expect(getCurrentQuestion(store(), attempt.id, Date.now())).toEqual({
+    expect(getCurrentQuestion(store(), attempt.id)).toEqual({
       status: 'quiz_unavailable',
       reason: 'edited',
     })
@@ -331,7 +333,7 @@ describe('quiz changed during an attempt', () => {
     const attempt = startAttempt('q1', 'u5')
     store().deleteQuiz('q1')
 
-    expect(getCurrentQuestion(store(), attempt.id, Date.now())).toEqual({
+    expect(getCurrentQuestion(store(), attempt.id)).toEqual({
       status: 'quiz_unavailable',
       reason: 'deleted',
     })

@@ -8,27 +8,35 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
 import { Pagination } from '../components/ui/Pagination'
-import { quizService } from '../services/quizService'
+import { useQuizData, useQuizStore } from '../store/quizStore'
 import type { Quiz } from '../types/models'
 import { paginate } from '../utils/paginate'
 
 const PAGE_SIZE = 4
 
 export function AdminQuizListPage() {
-  // TODO: delete through the data service.
-  const [quizzes, setQuizzes] = useState(() => quizService.getAllQuizzes())
+  const { quizzes } = useQuizData()
+  const deleteQuiz = useQuizStore((state) => state.deleteQuiz)
+  const resetData = useQuizStore((state) => state.resetData)
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<QuizSortKey>('title-asc')
   const [page, setPage] = useState(1)
   const [pendingDelete, setPendingDelete] = useState<Quiz | null>(null)
+  const [isResetOpen, setIsResetOpen] = useState(false)
 
   const pagination = paginate(searchAndSortQuizzes(quizzes, search, sort), page, PAGE_SIZE)
   const visible = pagination.items
 
   function confirmDelete() {
     if (!pendingDelete) return
-    setQuizzes((currentQuizzes) => currentQuizzes.filter((quiz) => quiz.id !== pendingDelete.id))
+    deleteQuiz(pendingDelete.id)
     setPendingDelete(null)
+  }
+
+  function confirmReset() {
+    resetData()
+    setPage(1)
+    setIsResetOpen(false)
   }
 
   return (
@@ -38,9 +46,14 @@ export function AdminQuizListPage() {
         size="md"
         title="Manage quizzes"
         actions={
-          <Button asChild className="self-start lg:self-auto">
-            <Link to="/admin/new">+ New quiz</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2 self-start lg:self-auto">
+            <Button variant="secondary" onClick={() => setIsResetOpen(true)}>
+              Reset data
+            </Button>
+            <Button asChild>
+              <Link to="/admin/new">+ New quiz</Link>
+            </Button>
+          </div>
         }
       />
 
@@ -78,6 +91,15 @@ export function AdminQuizListPage() {
         confirmLabel="Delete"
         onConfirm={confirmDelete}
         onCancel={() => setPendingDelete(null)}
+      />
+
+      <ConfirmDialog
+        open={isResetOpen}
+        title="Reset all data?"
+        message="Quizzes, attempts and the leaderboard go back to the original seed data. Your changes will be lost."
+        confirmLabel="Reset data"
+        onConfirm={confirmReset}
+        onCancel={() => setIsResetOpen(false)}
       />
     </section>
   )
