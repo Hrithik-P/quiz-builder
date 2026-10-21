@@ -22,7 +22,8 @@
   --line: #ddd3f0;
   --accent: #7c3aed;
   --accent-fg: #ffffff;
-  --focus: #db2777;
+  /* Follows the accent in both themes. Pink here read as an error next to the red field border. */
+  --focus: var(--accent);
   --danger: #dc2626;
   --success: #15803d;
   /* Chunky outlines and the hard offset shadow behind cards and buttons. */
@@ -51,7 +52,6 @@
     --line: #362f5e;
     --accent: #a78bfa;
     --accent-fg: #120f24;
-    --focus: #f472b6;
     --danger: #f87171;
     --success: #4ade80;
     --edge: #6d64c4;
@@ -77,7 +77,6 @@
   --line: #362f5e;
   --accent: #a78bfa;
   --accent-fg: #120f24;
-  --focus: #f472b6;
   --danger: #f87171;
   --success: #4ade80;
   --edge: #6d64c4;
