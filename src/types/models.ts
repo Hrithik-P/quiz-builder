@@ -41,7 +41,12 @@ export interface Quiz {
   perQuestionSeconds: number | null
   retakesAllowed: boolean
   questions: Question[]
+  /** Bumped on every save so an in-progress attempt can tell its quiz changed. Missing = 0. */
+  revision?: number
 }
+
+/** What the admin form submits: a quiz without the fields the store owns. */
+export type QuizInput = Omit<Quiz, 'id' | 'revision'>
 
 export type AttemptStatus = 'in_progress' | 'completed'
 
@@ -65,12 +70,18 @@ export interface Attempt {
   totalQuestions: number
   percentage: number | null
   timeTakenSeconds: number | null
+  /** The quiz revision the attempt started on. Missing = 0. */
+  quizRevision?: number
 }
 
-export interface Database {
-  meta: { version: number; generatedAt: string; notes?: string }
+/** Everything the app stores. The seed file has the same shape plus a `meta` block. */
+export interface QuizData {
   countries: Country[]
   users: User[]
   quizzes: Quiz[]
   attempts: Attempt[]
+}
+
+export interface Database extends QuizData {
+  meta: { version: number; generatedAt: string; notes?: string }
 }

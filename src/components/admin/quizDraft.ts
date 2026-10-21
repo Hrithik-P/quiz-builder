@@ -1,6 +1,6 @@
-import type { Option, Question, Quiz } from '../../types/models'
+import type { Option, Question, Quiz, QuizInput } from '../../types/models'
 
-export type QuizDraft = Omit<Quiz, 'id'>
+export type QuizDraft = QuizInput
 
 function newId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
