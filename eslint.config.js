@@ -25,6 +25,8 @@ export default defineConfig([
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // Property names are left out because library shapes (e.g. dnd-kit's `{ x, y }`) fix them.
+      'id-length': ['error', { min: 2, exceptions: [], properties: 'never' }],
       // shadcn/ui files share their cva variants with sibling components.
       'react-refresh/only-export-components': [
         'error',
