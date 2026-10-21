@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 interface SessionState {
-  /** The user picked in the header switcher (there is no real login). */
+  /** Set by the user switcher (there is no real login). */
   userId: string
   setUserId: (userId: string) => void
 }

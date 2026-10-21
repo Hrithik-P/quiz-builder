@@ -1,5 +1,12 @@
-import { useEffect, useId, useRef } from 'react'
-import { Button } from './Button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from './AlertDialog'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -10,7 +17,6 @@ interface ConfirmDialogProps {
   onCancel: () => void
 }
 
-/** Modal confirmation built on the native <dialog>, which handles focus trapping and Escape. */
 export function ConfirmDialog({
   open,
   title,
@@ -19,42 +25,16 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const ref = useRef<HTMLDialogElement>(null)
-  const titleId = useId()
-  const messageId = useId()
-
-  useEffect(() => {
-    const dialog = ref.current
-    if (!dialog) return
-    if (open && !dialog.open) dialog.showModal()
-    if (!open && dialog.open) dialog.close()
-  }, [open])
-
   return (
-    <dialog
-      ref={ref}
-      aria-labelledby={titleId}
-      aria-describedby={messageId}
-      onCancel={(event) => {
-        event.preventDefault()
-        onCancel()
-      }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border border-line bg-bg p-6 text-fg backdrop:bg-black/50"
-    >
-      <h2 id={titleId} className="text-lg font-semibold">
-        {title}
-      </h2>
-      <p id={messageId} className="mt-2 text-muted">
-        {message}
-      </p>
-      <div className="mt-6 flex justify-end gap-2">
-        <Button variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button variant="danger" onClick={onConfirm}>
-          {confirmLabel}
-        </Button>
-      </div>
-    </dialog>
+    <AlertDialog open={open} onOpenChange={(next) => (next ? undefined : onCancel())}>
+      <AlertDialogContent>
+        <AlertDialogTitle>{title}</AlertDialogTitle>
+        <AlertDialogDescription>{message}</AlertDialogDescription>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm}>{confirmLabel}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

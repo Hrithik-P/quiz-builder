@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
 /* `dark:` follows data-theme when set, otherwise the system setting. */
 @custom-variant dark {
@@ -12,7 +13,7 @@
   }
 }
 
-/* Colour tokens ("Pop Quiz"): change here, and every utility (bg-surface, text-muted…) follows. */
+/* Colour tokens: change them here and every utility follows. */
 :root {
   --bg: #f3eeff;
   --surface: #ffffff;

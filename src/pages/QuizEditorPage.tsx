@@ -1,8 +1,10 @@
 import { Link, useNavigate, useParams } from 'react-router'
 import { createEmptyDraft, toDraft } from '../components/admin/quizDraft'
 import { QuizForm } from '../components/admin/QuizForm'
-import { ButtonLink } from '../components/ui/Button'
+import { BackLink } from '../components/ui/BackLink'
+import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
+import { PageHeader } from '../components/ui/PageHeader'
 import { quizService } from '../services/quizService'
 
 /** Handles both /admin/new and /admin/:quizId/edit. */
@@ -17,22 +19,23 @@ export function QuizEditorPage() {
       <EmptyState
         title="Quiz not found"
         description="It may have been deleted."
-        action={<ButtonLink to="/admin">Back to admin</ButtonLink>}
+        action={
+          <Button asChild>
+            <Link to="/admin">Back to admin</Link>
+          </Button>
+        }
       />
     )
   }
 
   return (
     <section aria-labelledby="editor-heading" className="mx-auto flex max-w-3xl flex-col gap-6">
-      <Link to="/admin" className="text-sm text-muted hover:text-fg">
-        ← All quizzes
-      </Link>
-      <h1
-        id="editor-heading"
-        className="font-display text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
-      >
-        {quiz ? `Edit “${quiz.title}”` : 'New quiz'}
-      </h1>
+      <BackLink to="/admin" />
+      <PageHeader
+        headingId="editor-heading"
+        size="md"
+        title={quiz ? `Edit “${quiz.title}”` : 'New quiz'}
+      />
       <QuizForm
         key={quizId ?? 'new'}
         initial={quiz ? toDraft(quiz) : createEmptyDraft()}

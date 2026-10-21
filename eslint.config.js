@@ -25,6 +25,11 @@ export default defineConfig([
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      // shadcn/ui files share their cva variants with sibling components.
+      'react-refresh/only-export-components': [
+        'error',
+        { allowConstantExport: true, allowExportNames: ['buttonVariants', 'toggleVariants'] },
+      ],
     },
   },
 ])

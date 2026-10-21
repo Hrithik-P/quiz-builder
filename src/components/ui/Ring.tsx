@@ -1,17 +1,15 @@
 import type { ReactNode } from 'react'
 
 interface RingProps {
-  /** 0 to 1: how much of the ring is filled. */
+  /** 0 to 1. */
   fraction: number
   size: number
   strokeWidth: number
-  /** Tailwind stroke class for the filled arc, e.g. "stroke-accent". */
   arcClass: string
   trackClass?: string
   children?: ReactNode
 }
 
-/** A circular progress ring with content in the middle. Decorative: label the content instead. */
 export function Ring({
   fraction,
   size,

@@ -5,7 +5,7 @@ import { formatClock, formatPercentage } from '../../utils/format'
 interface LeaderboardListProps {
   entries: LeaderboardEntry[]
   currentUserId: string
-  /** The current user's entry when they are outside the top list. */
+  /** The current user's row when they are outside `entries`. */
   currentUserEntry?: LeaderboardEntry
 }
 
@@ -15,7 +15,7 @@ function YouTag() {
   return <span className="ml-1.5 text-xs font-bold text-accent">· you</span>
 }
 
-/** A table on wider screens, stacked cards on phones. */
+/** Table or cards by container width (not viewport), so it fits narrow columns too. */
 export function LeaderboardList({
   entries,
   currentUserId,
@@ -24,8 +24,8 @@ export function LeaderboardList({
   const rows = currentUserEntry ? [...entries, currentUserEntry] : entries
 
   return (
-    <>
-      <table className="hidden w-full border-separate border-spacing-y-1.5 text-left sm:table">
+    <div className="@container">
+      <table className="hidden w-full border-separate border-spacing-y-1.5 text-left @lg:table">
         <caption className="sr-only">Leaderboard, ranked by score then fastest time</caption>
         <thead className="text-xs font-bold tracking-[0.08em] text-muted uppercase">
           <tr>
@@ -83,7 +83,7 @@ export function LeaderboardList({
         </tbody>
       </table>
 
-      <ol className="flex flex-col gap-2 sm:hidden">
+      <ol className="flex flex-col gap-2 @lg:hidden">
         {rows.map((entry) => {
           const isMe = entry.userId === currentUserId
           return (
@@ -113,6 +113,6 @@ export function LeaderboardList({
           )
         })}
       </ol>
-    </>
+    </div>
   )
 }

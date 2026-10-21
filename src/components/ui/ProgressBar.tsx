@@ -4,10 +4,9 @@ interface ProgressBarProps {
   label: string
 }
 
-/** Above this many steps, segments get too thin, so fall back to one continuous bar. */
+/** Above this, segments get too thin, so use one continuous bar. */
 const MAX_SEGMENTS = 15
 
-/** A segmented bar: one pill per step, the current step outlined. */
 export function ProgressBar({ value, max, label }: ProgressBarProps) {
   const percent = max > 0 ? Math.min(100, (value / max) * 100) : 0
 

@@ -1,15 +1,14 @@
 import { Link } from 'react-router'
+import { ArrowRightIcon } from 'lucide-react'
 import type { Attempt } from '../../types/models'
 import type { QuizSummary } from '../../types/views'
 import { quizTileClass } from '../../utils/quizTheme'
-import { ArrowRightIcon } from '../ui/icons'
 
 interface ResumeBannerProps {
   quiz: QuizSummary
   attempt: Attempt
 }
 
-/** The big "pick up where you left off" card at the top of the quiz list. */
 export function ResumeBanner({ quiz, attempt }: ResumeBannerProps) {
   const answered = attempt.currentQuestionIndex
   const total = attempt.totalQuestions

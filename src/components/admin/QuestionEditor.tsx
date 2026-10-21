@@ -1,189 +1,109 @@
-import { useId } from 'react'
-import type { Question, QuestionType } from '../../types/models'
-import { Button } from '../ui/Button'
-import { cardClass, inputClass, labelClass } from '../ui/styles'
-import { createOption, type QuestionErrors } from './quizDraft'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import type { FocusEvent, KeyboardEvent } from 'react'
+import { useFormState, useWatch } from 'react-hook-form'
+import { GripVerticalIcon } from 'lucide-react'
+import { AccordionContent, AccordionItem, AccordionTrigger } from '../ui/Accordion'
+import { Badge } from '../ui/Badge'
+import { QuestionFields } from './QuestionFields'
+import { describeQuestion, type QuizDraft } from './quizDraft'
 
 interface QuestionEditorProps {
-  question: Question
+  /** Drag id (react-hook-form's row key). */
+  sortableId: string
+  /** Accordion item value: the question id. */
+  value: string
+  /** Position in the form's `questions` array. */
   index: number
-  total: number
-  errors?: QuestionErrors
-  onChange: (question: Question) => void
+  /** One-based position shown on screen. */
+  number: number
+  expanded: boolean
   onRemove: () => void
-  onMove: (direction: -1 | 1) => void
-}
-
-function FieldError({ id, message }: { id: string; message?: string }) {
-  if (!message) return null
-  return (
-    <p id={id} className="mt-1 text-sm text-danger">
-      {message}
-    </p>
-  )
+  isKeyboardMoving: boolean
+  handleRef: (node: HTMLElement | null) => void
+  onHandleKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void
+  onHandleBlur: (event: FocusEvent<HTMLButtonElement>) => void
 }
 
 export function QuestionEditor({
-  question,
+  sortableId,
+  value,
   index,
-  total,
-  errors,
-  onChange,
+  number,
+  expanded,
   onRemove,
-  onMove,
+  isKeyboardMoving,
+  handleRef,
+  onHandleKeyDown,
+  onHandleBlur,
 }: QuestionEditorProps) {
-  const baseId = useId()
-  const number = index + 1
-  const isSingle = question.type === 'single'
-
-  function setType(type: QuestionType) {
-    // Switching to single-choice keeps only the first correct option.
-    const correctOptionIds =
-      type === 'single' ? question.correctOptionIds.slice(0, 1) : question.correctOptionIds
-    onChange({ ...question, type, correctOptionIds })
-  }
-
-  function setOptionText(optionId: string, text: string) {
-    onChange({
-      ...question,
-      options: question.options.map((o) => (o.id === optionId ? { ...o, text } : o)),
-    })
-  }
-
-  function setCorrect(optionId: string, checked: boolean) {
-    const correctOptionIds = isSingle
-      ? [optionId]
-      : checked
-        ? [...question.correctOptionIds, optionId]
-        : question.correctOptionIds.filter((id) => id !== optionId)
-    onChange({ ...question, correctOptionIds })
-  }
-
-  function removeOption(optionId: string) {
-    onChange({
-      ...question,
-      options: question.options.filter((o) => o.id !== optionId),
-      correctOptionIds: question.correctOptionIds.filter((id) => id !== optionId),
-    })
-  }
+  const question = useWatch<QuizDraft, `questions.${number}`>({ name: `questions.${index}` })
+  const { errors } = useFormState<QuizDraft>({ name: `questions.${index}` })
+  const hasErrors = errors.questions?.[index] !== undefined
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: sortableId })
 
   return (
-    <fieldset className={`${cardClass} flex min-w-0 flex-col gap-4`}>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <legend className="contents">
-          <h3 className="font-display text-lg font-extrabold">Question {number}</h3>
-        </legend>
-        <div className="flex gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(-1)}
-            disabled={index === 0}
-            aria-label={`Move question ${number} up`}
+    <AccordionItem value={value} asChild>
+      <li
+        ref={setNodeRef}
+        style={{ transform: CSS.Translate.toString(transform), transition }}
+        className={`relative flex min-w-0 flex-col gap-4 rounded-3xl border-2 bg-surface p-5 shadow-pop ${
+          // Placeholder while the drag preview moves.
+          isDragging ? 'opacity-40' : ''
+        } ${
+          isKeyboardMoving ? 'z-10 outline-3 outline-offset-2 outline-accent' : ''
+        } ${hasErrors ? 'border-danger' : 'border-edge'}`}
+      >
+        <div className="flex items-center gap-2">
+          <AccordionTrigger>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="font-display text-lg font-extrabold">Question {number}</span>
+              {expanded ? null : (
+                <span className="truncate text-sm text-muted">
+                  {/* Makes the accessible name read "Question 2: …". */}
+                  <span className="sr-only">: </span>
+                  {describeQuestion(question)}
+                </span>
+              )}
+            </span>
+            {hasErrors ? (
+              <Badge variant="destructive">
+                <span className="sr-only">, </span>Needs fixing
+              </Badge>
+            ) : null}
+          </AccordionTrigger>
+          <button
+            type="button"
+            ref={(node) => {
+              setActivatorNodeRef(node)
+              handleRef(node)
+            }}
+            {...attributes}
+            {...listeners}
+            aria-pressed={isKeyboardMoving}
+            onKeyDown={onHandleKeyDown}
+            onBlur={onHandleBlur}
+            aria-label={`Drag to reorder question ${number}`}
+            className={`grid size-11 shrink-0 touch-none place-items-center rounded-xl border-2 border-edge bg-bg text-fg hover:bg-accent/15 ${
+              isDragging ? 'cursor-grabbing' : 'cursor-grab'
+            }`}
           >
-            ↑
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(1)}
-            disabled={index === total - 1}
-            aria-label={`Move question ${number} down`}
-          >
-            ↓
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-danger"
-            onClick={onRemove}
-            aria-label={`Remove question ${number}`}
-          >
-            Remove
-          </Button>
+            <GripVerticalIcon size={20} />
+          </button>
         </div>
-      </div>
 
-      <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
-        <div>
-          <label htmlFor={`${baseId}-text`} className={labelClass}>
-            Question text
-          </label>
-          <textarea
-            id={`${baseId}-text`}
-            rows={2}
-            className={inputClass}
-            value={question.text}
-            onChange={(event) => onChange({ ...question, text: event.target.value })}
-            aria-invalid={errors?.text ? true : undefined}
-            aria-describedby={errors?.text ? `${baseId}-text-error` : undefined}
-          />
-          <FieldError id={`${baseId}-text-error`} message={errors?.text} />
-        </div>
-        <div>
-          <label htmlFor={`${baseId}-type`} className={labelClass}>
-            Answer type
-          </label>
-          <select
-            id={`${baseId}-type`}
-            className={inputClass}
-            value={question.type}
-            onChange={(event) => setType(event.target.value as QuestionType)}
-          >
-            <option value="single">Single choice</option>
-            <option value="multiple">Multiple choice</option>
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <p className={labelClass}>
-          Options{' '}
-          <span className="font-normal text-muted">
-            ({isSingle ? 'select the correct one' : 'tick every correct one'})
-          </span>
-        </p>
-        <ul className="flex flex-col gap-2">
-          {question.options.map((option, optionIndex) => (
-            <li key={option.id} className="flex items-center gap-2">
-              <input
-                type={isSingle ? 'radio' : 'checkbox'}
-                name={`${baseId}-correct`}
-                checked={question.correctOptionIds.includes(option.id)}
-                onChange={(event) => setCorrect(option.id, event.target.checked)}
-                aria-label={`Option ${optionIndex + 1} is correct`}
-                className="size-5 shrink-0 accent-success"
-              />
-              <input
-                type="text"
-                className={inputClass}
-                value={option.text}
-                placeholder={`Option ${optionIndex + 1}`}
-                onChange={(event) => setOptionText(option.id, event.target.value)}
-                aria-label={`Option ${optionIndex + 1} text`}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="shrink-0"
-                onClick={() => removeOption(option.id)}
-                aria-label={`Remove option ${optionIndex + 1}`}
-              >
-                ✕
-              </Button>
-            </li>
-          ))}
-        </ul>
-        <FieldError id={`${baseId}-options-error`} message={errors?.options} />
-        <FieldError id={`${baseId}-correct-error`} message={errors?.correct} />
-        <Button
-          variant="secondary"
-          className="mt-3"
-          onClick={() => onChange({ ...question, options: [...question.options, createOption()] })}
-        >
-          + Add option
-        </Button>
-      </div>
-    </fieldset>
+        <AccordionContent className="flex flex-col gap-4">
+          <QuestionFields index={index} onRemove={onRemove} />
+        </AccordionContent>
+      </li>
+    </AccordionItem>
   )
 }

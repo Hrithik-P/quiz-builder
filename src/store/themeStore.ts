@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 
 export type ThemePreference = 'system' | 'light' | 'dark'
 
-/** localStorage key; index.html reads it too, to set the theme before first paint. */
+/** index.html reads this key too, to apply the theme before first paint. */
 export const THEME_STORAGE_KEY = 'quiz-theme'
 
 interface ThemeState {

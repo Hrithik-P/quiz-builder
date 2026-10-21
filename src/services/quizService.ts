@@ -1,13 +1,7 @@
 import type { Attempt, Country, Question, Quiz, User } from '../types/models'
 import type { AttemptResult, LeaderboardEntry, PublicQuestion, QuizSummary } from '../types/views'
 
-/**
- * Data service: the only code allowed to touch browser storage.
- *
- * Every function is a typed stub that returns "no data", so the UI renders its empty states.
- * TODO: seed localStorage from src/data/seed.json on first load, persist every change, add
- * a "Reset data" action, and compute scoring and timing here from stored timestamps.
- */
+/** The only code that touches stored data. TODO: replace these stubs with the real service. */
 export const quizService = {
   getUsers(): User[] {
     return []
@@ -21,7 +15,6 @@ export const quizService = {
     return []
   },
 
-  /** Admin list and leaderboard picker: every quiz, unfiltered. */
   getAllQuizzes(): Quiz[] {
     return []
   },
@@ -30,7 +23,6 @@ export const quizService = {
     return undefined
   },
 
-  /** Quizzes for a country (all when omitted), with the user's completion and best score. */
   getQuizzes(_userId: string, _country?: string): QuizSummary[] {
     return []
   },
@@ -55,12 +47,12 @@ export const quizService = {
     return undefined
   },
 
-  /** Each user's best attempt, ranked by score, ties broken by faster time. */
+  /** Best attempt per user, ranked by score, then faster time. */
   getLeaderboard(_quizId: string): LeaderboardEntry[] {
     return []
   },
 
-  /** Strips the correct answers so the attend screen can never see them. */
+  /** Strips the correct answers. */
   toPublicQuestion(question: Question): PublicQuestion {
     return { id: question.id, text: question.text, type: question.type, options: question.options }
   },

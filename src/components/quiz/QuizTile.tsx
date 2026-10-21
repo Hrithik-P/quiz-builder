@@ -6,7 +6,6 @@ interface QuizTileProps {
   className?: string
 }
 
-/** The quiz's colour square with its monogram. Decorative: the title is always shown next to it. */
 export function QuizTile({
   quizId,
   title,

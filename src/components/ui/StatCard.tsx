@@ -1,7 +1,6 @@
-interface StatCardProps {
+export interface StatCardProps {
   label: string
   value: string
-  /** Colours the value, e.g. green for correct answers. */
   tone?: 'default' | 'success' | 'danger'
 }
 

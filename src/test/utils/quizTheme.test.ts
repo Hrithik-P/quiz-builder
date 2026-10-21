@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { initials, quizMonogram, quizTileClass } from './quizTheme'
+import { initials, quizMonogram, quizTileClass } from '../../utils/quizTheme'
 
 describe('quizTheme', () => {
   it('gives each quiz a stable tile colour', () => {

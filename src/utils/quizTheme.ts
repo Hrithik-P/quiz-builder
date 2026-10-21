@@ -1,7 +1,7 @@
-/** Background classes for the per-quiz colours (spelled out so Tailwind can see them). */
+/** Spelled out so Tailwind can find them. */
 const TILE_CLASSES = ['bg-tile-1', 'bg-tile-2', 'bg-tile-3', 'bg-tile-4', 'bg-tile-5'] as const
 
-/** A stable colour for a quiz, derived from its id so it never changes between screens. */
+/** Derived from the id, so a quiz keeps its colour on every screen. */
 export function quizTileClass(quizId: string): string {
   let hash = 0
   for (const char of quizId) hash = (hash + char.charCodeAt(0)) % TILE_CLASSES.length

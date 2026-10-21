@@ -1,26 +1,28 @@
-import type { ReactNode } from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+import type * as React from 'react'
+import { cn } from '../../utils/cn'
 
-type Tone = 'neutral' | 'accent' | 'success' | 'danger' | 'ink'
+const badgeVariants = cva(
+  'inline-flex w-fit shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap',
+  {
+    variants: {
+      variant: {
+        default: 'border border-line bg-bg text-muted',
+        accent: 'bg-accent/15 text-accent',
+        success: 'bg-success/15 text-success',
+        destructive: 'bg-danger/15 text-danger',
+      },
+    },
+    defaultVariants: { variant: 'default' },
+  },
+)
 
-const tones: Record<Tone, string> = {
-  neutral: 'border border-line bg-bg text-muted',
-  accent: 'bg-accent/15 text-accent',
-  success: 'bg-success/15 text-success',
-  danger: 'bg-danger/15 text-danger',
-  ink: 'bg-fg text-bg',
+function Badge({
+  className,
+  variant,
+  ...props
+}: React.ComponentProps<'span'> & VariantProps<typeof badgeVariants>) {
+  return <span data-slot="badge" className={cn(badgeVariants({ variant }), className)} {...props} />
 }
 
-interface BadgeProps {
-  tone?: Tone
-  children: ReactNode
-}
-
-export function Badge({ tone = 'neutral', children }: BadgeProps) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${tones[tone]}`}
-    >
-      {children}
-    </span>
-  )
-}
+export { Badge }

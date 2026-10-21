@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import { QuizCard, QuizCardSkeleton } from '../components/quiz/QuizCard'
+import { QuizGrid, QuizGridSkeleton } from '../components/quiz/QuizGrid'
 import { ResumeBanner } from '../components/quiz/ResumeBanner'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
+import { PageHeader } from '../components/ui/PageHeader'
 import { Skeleton } from '../components/ui/Skeleton'
-import { displayClass, eyebrowClass } from '../components/ui/styles'
+import { ToggleGroup, ToggleGroupItem } from '../components/ui/ToggleGroup'
 import { useServiceData } from '../hooks/useServiceData'
 import { quizService } from '../services/quizService'
 import { useSessionStore } from '../store/sessionStore'
 import type { QuizSummary } from '../types/views'
 import { formatPercentage } from '../utils/format'
+
+const ALL = 'all'
 
 function progressLine(quizzes: QuizSummary[]): string {
   const done = quizzes.filter((q) => q.completed)
@@ -19,13 +22,13 @@ function progressLine(quizzes: QuizSummary[]): string {
   return parts.join(' · ')
 }
 
-const chipClass =
-  'min-h-11 shrink-0 rounded-full border-2 border-edge px-4 text-sm font-semibold whitespace-nowrap transition-colors aria-pressed:bg-fg aria-pressed:text-bg hover:bg-surface aria-pressed:hover:bg-fg'
-
 export function QuizListPage() {
   const userId = useSessionStore((s) => s.userId)
   const [country, setCountry] = useState('')
-  const countries = quizService.getCountries()
+  const countryOptions = [
+    { value: ALL, label: 'All' },
+    ...quizService.getCountries().map((c) => ({ value: c.code, label: c.name })),
+  ]
   const firstName = quizService.getUser(userId)?.name.split(' ')[0] ?? 'there'
   const { data: quizzes, loading } = useServiceData(`${userId}:${country}`, () =>
     quizService.getQuizzes(userId, country || undefined),
@@ -38,73 +41,45 @@ export function QuizListPage() {
 
   return (
     <section aria-labelledby="quiz-list-heading" className="flex flex-col gap-6 sm:gap-8">
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex flex-col gap-2">
-          <p className={eyebrowClass}>Hi, {firstName}</p>
-          <h1
-            id="quiz-list-heading"
-            className={`${displayClass} text-4xl leading-[1.02] sm:text-5xl lg:text-6xl`}
-          >
-            Pick your next quiz
-          </h1>
-          {loading ? (
+      <PageHeader
+        headingId="quiz-list-heading"
+        eyebrow={`Hi, ${firstName}`}
+        title="Pick your next quiz"
+        description={
+          loading ? (
             <Skeleton className="h-5 w-56" />
-          ) : (
-            quizzes && quizzes.length > 0 && <p className="text-muted">{progressLine(quizzes)}</p>
-          )}
-        </div>
-
-        <div
-          role="group"
-          aria-label="Filter by country"
-          className="-mx-4 flex [scrollbar-width:none] gap-2 overflow-x-auto px-4 lg:mx-0 lg:flex-wrap lg:px-0"
-        >
-          <button
-            type="button"
-            aria-pressed={country === ''}
-            className={chipClass}
-            onClick={() => setCountry('')}
+          ) : quizzes && quizzes.length > 0 ? (
+            <p className="text-muted">{progressLine(quizzes)}</p>
+          ) : null
+        }
+        actions={
+          <ToggleGroup
+            type="single"
+            aria-label="Filter by country"
+            value={country || ALL}
+            // Ignore deselecting the active chip: one filter is always on.
+            onValueChange={(value) => value && setCountry(value === ALL ? '' : value)}
+            className="-mx-4 [scrollbar-width:none] flex-nowrap overflow-x-auto px-4 lg:mx-0 lg:flex-wrap lg:px-0"
           >
-            All
-          </button>
-          {countries.map((c) => (
-            <button
-              key={c.code}
-              type="button"
-              aria-pressed={country === c.code}
-              className={chipClass}
-              onClick={() => setCountry(c.code)}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-      </div>
+            {countryOptions.map((option) => (
+              <ToggleGroupItem key={option.value} value={option.value}>
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        }
+      />
 
       {loading ? (
-        <div aria-busy="true" aria-label="Loading quizzes" className="flex flex-col gap-6">
-          <Skeleton className="h-44 rounded-3xl" />
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 3 }, (_, i) => (
-              <QuizCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
+        <QuizGridSkeleton />
       ) : quizzes && quizzes.length > 0 ? (
         <>
-          {resumable?.attempt && <ResumeBanner quiz={resumable.quiz} attempt={resumable.attempt} />}
-          {rest.length > 0 && (
-            <div className="flex flex-col gap-4">
-              <h2 className={eyebrowClass}>{resumable ? 'More quizzes' : 'All quizzes'}</h2>
-              <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {rest.map((quiz) => (
-                  <li key={quiz.id} className="grid">
-                    <QuizCard quiz={quiz} />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          {resumable?.attempt ? (
+            <ResumeBanner quiz={resumable.quiz} attempt={resumable.attempt} />
+          ) : null}
+          {rest.length > 0 ? (
+            <QuizGrid title={resumable ? 'More quizzes' : 'All quizzes'} quizzes={rest} />
+          ) : null}
         </>
       ) : (
         <EmptyState

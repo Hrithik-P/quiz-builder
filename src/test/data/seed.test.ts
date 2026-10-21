@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { Database } from '../types/models'
-import seedJson from './seed.json'
+import seedJson from '../../data/seed.json'
+import type { Database } from '../../types/models'
 
 const seed: Database = seedJson as Database
 

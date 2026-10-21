@@ -1,13 +1,13 @@
 import type { Ref } from 'react'
+import { CheckIcon, CircleDotIcon, SquareCheckIcon } from 'lucide-react'
 import type { PublicQuestion } from '../../types/views'
-import { CheckboxIcon, CheckIcon, RadioIcon } from '../ui/icons'
 
 interface QuestionViewProps {
   question: PublicQuestion
   selectedOptionIds: string[]
   onChange: (optionIds: string[]) => void
   disabled?: boolean
-  /** Receives focus when a new question appears. */
+  /** Focused when a new question appears. */
   headingRef?: Ref<HTMLHeadingElement>
 }
 
@@ -46,7 +46,7 @@ export function QuestionView({
         </h2>
       </legend>
       <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-sm font-bold text-accent">
-        {isMultiple ? <CheckboxIcon size={15} /> : <RadioIcon size={15} />}
+        {isMultiple ? <SquareCheckIcon size={15} /> : <CircleDotIcon size={15} />}
         {isMultiple ? 'Pick all that apply' : 'Pick one answer'}
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4">

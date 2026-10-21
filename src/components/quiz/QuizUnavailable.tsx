@@ -1,4 +1,5 @@
-import { ButtonLink } from '../ui/Button'
+import { Link } from 'react-router'
+import { Button } from '../ui/Button'
 import { EmptyState } from '../ui/EmptyState'
 
 interface QuizUnavailableProps {
@@ -27,7 +28,11 @@ export function QuizUnavailable({ reason }: QuizUnavailableProps) {
     <EmptyState
       title={title}
       description={description}
-      action={<ButtonLink to="/">Back to quizzes</ButtonLink>}
+      action={
+        <Button asChild>
+          <Link to="/">Back to quizzes</Link>
+        </Button>
+      }
     />
   )
 }

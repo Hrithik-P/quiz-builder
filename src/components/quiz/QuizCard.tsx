@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
+import { LockIcon } from 'lucide-react'
 import type { QuizSummary } from '../../types/views'
 import { formatPercentage, formatTimeLimit } from '../../utils/format'
-import { LockIcon } from '../ui/icons'
 import { Skeleton } from '../ui/Skeleton'
 import { QuizTile } from './QuizTile'
 
@@ -41,7 +41,7 @@ export function QuizCard({ quiz }: QuizCardProps) {
         <div className="flex items-start gap-3">
           <QuizTile quizId={quiz.id} title={quiz.title} />
           <h2 className="flex-1 self-center text-lg leading-tight font-bold">
-            {/* The ::after overlay makes the whole card clickable with a single link. */}
+            {/* The ::after overlay makes the whole card clickable. */}
             <Link
               to={`/quiz/${quiz.id}`}
               className="no-underline after:absolute after:inset-0 after:rounded-3xl focus-visible:outline-none"

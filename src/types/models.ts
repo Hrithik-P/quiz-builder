@@ -35,9 +35,9 @@ export interface Quiz {
   title: string
   description: string
   countries: CountryCode[]
-  /** Overall limit for the whole attempt; null means no overall limit. */
+  /** null = no overall limit. */
   timeLimitSeconds: number | null
-  /** Limit per question; null means no per-question limit. */
+  /** null = no per-question limit. */
   perQuestionSeconds: number | null
   retakesAllowed: boolean
   questions: Question[]

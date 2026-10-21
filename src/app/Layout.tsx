@@ -1,13 +1,13 @@
 import type { ComponentType } from 'react'
 import { NavLink, Outlet, useMatches } from 'react-router'
-import { GridIcon, PencilIcon, PodiumIcon } from '../components/ui/icons'
+import { LayoutGridIcon, PencilIcon, TrophyIcon } from 'lucide-react'
 import { ThemeToggle } from '../components/ui/ThemeToggle'
 import { UserSwitcher } from '../components/ui/UserSwitcher'
 import { useApplyTheme } from '../hooks/useApplyTheme'
 import { quizService } from '../services/quizService'
 import { useSessionStore } from '../store/sessionStore'
 
-/** Route `handle` flag: hide the app navigation so the attempt screen has the whole viewport. */
+/** Route handle: hides the app nav (the attempt screen uses it). */
 export interface RouteHandle {
   focusMode?: boolean
 }
@@ -20,8 +20,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: '/', label: 'Quizzes', Icon: GridIcon, end: true },
-  { to: '/leaderboard', label: 'Leaderboard', Icon: PodiumIcon },
+  { to: '/', label: 'Quizzes', Icon: LayoutGridIcon, end: true },
+  { to: '/leaderboard', label: 'Leaderboard', Icon: TrophyIcon },
   { to: '/admin', label: 'Admin', Icon: PencilIcon },
 ]
 
@@ -51,7 +51,6 @@ export function Layout() {
 
       {!focusMode && (
         <>
-          {/* Phones and tablets: brand, user and theme on top; navigation docked at the bottom. */}
           <header className="flex items-center justify-between gap-3 px-4 pt-4 lg:hidden">
             <span className="hidden min-[400px]:inline">
               <Brand />

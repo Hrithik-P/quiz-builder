@@ -4,15 +4,13 @@ import { Ring } from '../ui/Ring'
 interface CountdownDisplayProps {
   label: string
   secondsLeft: number
-  /** The full allowance, so the ring can show how much is left. */
   totalSeconds: number
-  /** Turns red and is announced to screen readers at or below this many seconds. */
+  /** Turns red at or below this many seconds. */
   warnAt?: number
 }
 
 const ANNOUNCE_AT = new Set([60, 30, 10])
 
-/** A ring countdown pill: the arc drains as time runs out. */
 export function CountdownDisplay({
   label,
   secondsLeft,

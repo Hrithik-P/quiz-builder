@@ -1,18 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { CountdownDisplay } from '../components/quiz/CountdownDisplay'
+import { useNavigate, useParams } from 'react-router'
+import { AttemptHeader, type AttemptTimer } from '../components/quiz/AttemptHeader'
 import { QuestionView } from '../components/quiz/QuestionView'
-import { QuizTile } from '../components/quiz/QuizTile'
 import { QuizUnavailable } from '../components/quiz/QuizUnavailable'
-import { Button } from '../components/ui/Button'
-import { ArrowRightIcon, CloseIcon } from '../components/ui/icons'
-import { ProgressBar } from '../components/ui/ProgressBar'
+import { SubmitBar } from '../components/quiz/SubmitBar'
 import { quizService } from '../services/quizService'
 
-/**
- * UI only: question navigation is local state and the timers are static.
- * TODO: replace with useQuizAttempt / useCountdown backed by the data service.
- */
+// TODO: use useQuizAttempt / useCountdown once the data service exists.
 export function QuizAttendPage() {
   const { quizId = '', attemptId = '' } = useParams()
   const navigate = useNavigate()
@@ -24,7 +18,7 @@ export function QuizAttendPage() {
   const [submitting, setSubmitting] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
-  // Move focus to each new question so keyboard and screen-reader users land on it.
+  // Focus each new question for keyboard and screen-reader users.
   useEffect(() => {
     headingRef.current?.focus()
   }, [index])
@@ -40,13 +34,28 @@ export function QuizAttendPage() {
 
   const total = quiz.questions.length
   const isLast = index === total - 1
+  const timers: AttemptTimer[] = []
+  if (quiz.timeLimitSeconds !== null) {
+    timers.push({
+      label: 'Quiz',
+      secondsLeft: quiz.timeLimitSeconds,
+      totalSeconds: quiz.timeLimitSeconds,
+    })
+  }
+  if (quiz.perQuestionSeconds !== null) {
+    timers.push({
+      label: 'Question',
+      secondsLeft: quiz.perQuestionSeconds,
+      totalSeconds: quiz.perQuestionSeconds,
+    })
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (submitting || selected.length === 0) return
     setSubmitting(true)
     if (isLast) {
-      // TODO: completeAttempt(attemptId) first, so the results page has a result to show.
+      // TODO: completeAttempt(attemptId) first.
       navigate(`/results/${attemptId}`, { replace: true })
       return
     }
@@ -55,7 +64,7 @@ export function QuizAttendPage() {
     setSubmitting(false)
   }
 
-  // Enter on a radio/checkbox does not submit a form natively, so do it here.
+  // Enter on a radio or checkbox doesn't submit a form natively.
   function handleKeyDown(event: KeyboardEvent<HTMLFormElement>) {
     if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
       event.preventDefault()
@@ -65,66 +74,20 @@ export function QuizAttendPage() {
 
   return (
     <section aria-label={`${quiz.title} quiz`} className="flex min-h-dvh flex-col">
-      <header className="border-b-2 border-edge bg-surface">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-3 px-4 py-3 sm:px-6">
-          <Link
-            to={`/quiz/${quiz.id}`}
-            aria-label="Save and exit. Your progress is kept."
-            className="inline-flex size-11 shrink-0 items-center justify-center gap-2 rounded-full border-2 border-edge font-bold no-underline hover:bg-bg sm:w-auto sm:pr-4 sm:pl-3"
-          >
-            <CloseIcon size={18} />
-            <span className="hidden text-sm sm:inline" aria-hidden="true">
-              Save and exit
-            </span>
-          </Link>
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="hidden sm:block">
-              <QuizTile
-                quizId={quiz.id}
-                title={quiz.title}
-                className="size-10 rounded-xl text-base"
-              />
-            </span>
-            <div className="min-w-0">
-              <h1 className="truncate text-sm font-bold text-muted sm:text-base sm:text-fg">
-                {quiz.title}
-              </h1>
-              <p
-                className="font-display text-lg font-extrabold sm:font-sans sm:text-sm sm:font-medium sm:text-muted"
-                aria-live="polite"
-              >
-                Question {index + 1} of {total}
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            {quiz.timeLimitSeconds !== null && (
-              <CountdownDisplay
-                label="Quiz"
-                secondsLeft={quiz.timeLimitSeconds}
-                totalSeconds={quiz.timeLimitSeconds}
-              />
-            )}
-            {quiz.perQuestionSeconds !== null && (
-              <CountdownDisplay
-                label="Question"
-                secondsLeft={quiz.perQuestionSeconds}
-                totalSeconds={quiz.perQuestionSeconds}
-              />
-            )}
-          </div>
-          <div className="w-full lg:order-none lg:w-64 lg:flex-none xl:w-80">
-            <ProgressBar value={index + 1} max={total} label="Quiz progress" />
-          </div>
-        </div>
-      </header>
+      <AttemptHeader
+        quizId={quiz.id}
+        quizTitle={quiz.title}
+        questionNumber={index + 1}
+        total={total}
+        timers={timers}
+      />
 
       <form
         onSubmit={handleSubmit}
         onKeyDown={handleKeyDown}
         className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 pt-8 pb-6 sm:px-6 lg:pt-14"
       >
-        {/* Keyed so each question re-mounts and plays the enter animation. */}
+        {/* Keyed so each question replays the enter animation. */}
         <div key={question.id} className="animate-question-in">
           <QuestionView
             question={quizService.toPublicQuestion(question)}
@@ -134,24 +97,10 @@ export function QuizAttendPage() {
             headingRef={headingRef}
           />
         </div>
-        <div className="sticky bottom-0 -mx-4 mt-auto flex items-center justify-end gap-4 bg-bg/90 px-4 py-4 backdrop-blur sm:static sm:mx-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
-          <p className="hidden text-sm text-muted sm:block">
-            Press{' '}
-            <kbd className="rounded-md border-2 border-line bg-surface px-1.5 font-sans text-xs font-bold text-fg">
-              Enter
-            </kbd>{' '}
-            to submit
-          </p>
-          <Button
-            type="submit"
-            size="xl"
-            className="w-full sm:w-auto"
-            disabled={submitting || selected.length === 0}
-          >
-            {isLast ? 'Finish quiz' : 'Lock it in'}
-            <ArrowRightIcon size={22} />
-          </Button>
-        </div>
+        <SubmitBar
+          label={isLast ? 'Finish quiz' : 'Lock it in'}
+          disabled={submitting || selected.length === 0}
+        />
       </form>
     </section>
   )

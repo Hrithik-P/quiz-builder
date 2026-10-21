@@ -1,6 +1,5 @@
 import type { Question, Quiz } from './models'
 
-/** A quiz as shown in lists: no questions, plus the current user's progress. */
 export type QuizSummary = Omit<Quiz, 'questions'> & {
   questionCount: number
   completed: boolean
@@ -8,7 +7,7 @@ export type QuizSummary = Omit<Quiz, 'questions'> & {
   bestPercentage: number | null
 }
 
-/** A question as the attend screen may see it: never includes the correct answers. */
+/** Never includes the correct answers. */
 export type PublicQuestion = Omit<Question, 'correctOptionIds'>
 
 export interface AttemptResult {
