@@ -258,3 +258,18 @@ score, and the country filter.
 **Quiz builder:** the shared add/edit form with time limits, retakes, countries and questions.
 
 ![New quiz form](public/Screenshot%20from%202026-10-21%2018-13-53.png)
+
+## 7. AI usage
+
+**Tool:** Claude Code.
+
+I planned the app and made the technical decisions myself: how data is stored and handled (one
+Zustand store saved to `localStorage`, with scoring and timing calculated from saved timestamps),
+and which packages to use and why (see section 3). I also set the design direction.
+
+I used Claude Code to build from that plan and to review the code as a senior frontend engineer
+would, looking for bugs, security issues and edge cases. I chose which findings to fix.
+
+**Mainly AI-generated:** boilerplate and setup, most of the tests, and most of the styling.
+
+I reviewed and tested all of it before committing.
