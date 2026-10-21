@@ -27,7 +27,8 @@ npm run format       # Prettier (also sorts Tailwind classes)
   survives reloads.
 - **Reset:** the "Reset data" button on the admin page (with a confirmation) puts the seed back.
 - **Who saves it:** the Zustand `persist` middleware in `src/store/quizStore.ts`. Components never
-  read or write browser storage; they use the store.
+  read or write browser storage; they use the store. A change in one tab is picked up by the other
+  open tabs through the browser's `storage` event.
 
 ## 3. Architecture and library choices
 
@@ -130,8 +131,8 @@ answer's time (or `startedAt`) plus `perQuestionSeconds`.
 
 **Known limitations**
 
-- `localStorage` is per browser. `persist` does not sync changes between open tabs, so a second
-  tab shows the older data until it is reloaded.
+- `localStorage` is per browser. Open tabs stay in sync through the `storage` event, but if two
+  tabs save within a few milliseconds of each other, the last one wins.
 - There is no real authentication: the user switcher trusts whoever uses it. Quiz input is
   validated in the form (Zod); the store does not re-validate it.
 - If a tab is in the background when a question's time runs out, the browser may delay the timer
@@ -145,7 +146,7 @@ answer's time (or `startedAt`) plus `perQuestionSeconds`.
   on mobile and desktop.
 - Lazy-load the admin routes, JSON export/import of quizzes, an image upload/URL field for answer
   options in the builder (options already render an `imageUrl` when present), and i18n.
-- Sync tabs with a `storage` event listener, and share the Zod quiz schema with the store.
+- Share the Zod quiz schema with the store.
 
 ## Project conventions
 

@@ -405,6 +405,33 @@ describe('persistence', () => {
     expect(store().quizzes.map((quiz) => quiz.id)).not.toContain('q1')
   })
 
+  it('picks up a change saved by another tab', async () => {
+    const otherTab = {
+      state: {
+        countries: seed.countries,
+        users: seed.users,
+        attempts: seed.attempts,
+        quizzes: seed.quizzes.filter((quiz) => quiz.id !== 'q1'),
+      },
+      version: 1,
+    }
+    const raw = JSON.stringify(otherTab)
+
+    // What the browser does in this tab when another tab saves.
+    localStorage.setItem(QUIZ_STORAGE_KEY, raw)
+    window.dispatchEvent(new StorageEvent('storage', { key: QUIZ_STORAGE_KEY, newValue: raw }))
+
+    await vi.waitFor(() => {
+      expect(store().quizzes.map((quiz) => quiz.id)).not.toContain('q1')
+    })
+  })
+
+  it('ignores storage changes to other keys', async () => {
+    window.dispatchEvent(new StorageEvent('storage', { key: 'something-else' }))
+    await Promise.resolve()
+    expect(store().quizzes).toHaveLength(5)
+  })
+
   it('keeps answers across a reload so an attempt can be resumed', async () => {
     const attempt = startAttempt('q1', 'u5')
     answerCorrectly('q1', attempt.id)

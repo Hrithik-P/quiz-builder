@@ -224,6 +224,12 @@ export const useQuizStore = create<QuizStore>()(
 // `persist` only saves when state changes. Write the seed once so storage holds it from the first load.
 if (localStorage.getItem(QUIZ_STORAGE_KEY) === null) useQuizStore.setState({})
 
+// The browser fires `storage` in the other open tabs when this tab saves. Re-read, so a tab never
+// shows old data or saves its stale copy over the other tab's changes.
+window.addEventListener('storage', (event) => {
+  if (event.key === QUIZ_STORAGE_KEY) void useQuizStore.persist.rehydrate()
+})
+
 /** The stored data for rendering. Re-renders the caller whenever any of it changes. */
 export function useQuizData(): QuizData {
   return useQuizStore(
