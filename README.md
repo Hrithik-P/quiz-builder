@@ -13,10 +13,23 @@ npm install
 npm run dev          # dev server at http://localhost:5173
 npm run build        # type-check and production build
 npm test             # unit and component tests (Vitest)
+npm run test:e2e     # end-to-end tests (Playwright), see below
 npm run lint         # ESLint, must be clean
 npm run typecheck
 npm run format       # Prettier (also sorts Tailwind classes)
 ```
+
+### End-to-end tests
+
+`npm run test:e2e` builds the app, serves the production build and runs the Playwright tests in
+`e2e/` at desktop size and at 360 px wide. The first time, install the browser with
+`npx playwright install chromium`. To use a Chrome you already have instead, run
+`PLAYWRIGHT_CHANNEL=chrome npm run test:e2e`.
+
+The main test takes a quiz from the list to the leaderboard: it answers every question (with a
+reload in the middle to prove the attempt resumes), checks focus moves to each new question,
+submits with Enter, and checks the results, leaderboard and quiz list. Two smaller tests cover a
+quiz without retakes and the seed attempt that has already run out of time.
 
 ## 2. How data is seeded, stored and reset
 
@@ -25,6 +38,10 @@ npm run format       # Prettier (also sorts Tailwind classes)
 - **First load:** nothing is saved yet, so the store starts from the seed and writes it to
   `localStorage` under `quiz-platform:db:v1`. After that every change is saved there, so data
   survives reloads.
+- **Unreadable data:** what comes out of localStorage is not trusted. If it is not valid JSON or
+  not shaped like the app's data (cleared halfway, edited by hand, an older version), it is
+  ignored, the seed is used, and storage is rewritten with valid data. Only the top-level shape is
+  checked, not every field of every record.
 - **Reset:** the "Reset data" button on the admin page (with a confirmation) puts the seed back.
 - **Who saves it:** the Zustand `persist` middleware in `src/store/quizStore.ts`. Components never
   read or write browser storage; they use the store. A change in one tab is picked up by the other
@@ -48,6 +65,19 @@ pages / hooks  ->  useQuizStore (data + actions, persisted)
   delay), `useUnsavedChangesGuard`.
 - `src/pages/` are thin: they compose hooks and components. `src/components/` has `ui/`
   (domain-agnostic building blocks) and feature folders.
+- `src/app/` has the route table (`routes.tsx`), the layout and the error page.
+
+**Bundle.** The admin screens (the form, validation and drag-and-drop libraries) are lazy-loaded
+the first time they are visited, and the React and UI libraries are split into their own cached
+chunks. First load went from 741 kB (231 kB gzipped) to about 538 kB (169 kB gzipped), and no chunk
+is over 500 kB.
+
+**Error handling.** React Router error boundaries sit in two places: around the screens, so a
+crash is shown inside the app shell and the navigation keeps working, and around the shell itself.
+The page shows a plain message with "Try again" and "Back to quizzes", never the raw error or
+stack, which are logged to the console instead. A lazy chunk that fails to download gets its own
+message. Boundaries only catch errors thrown while rendering (and loading a route); errors in event
+handlers are handled where they happen.
 
 **State: Zustand with `persist`.** One store is the single source of truth. Screens read it with
 `useQuizData()`, so after any action (a finished attempt, an admin edit) every screen that shows
@@ -138,14 +168,13 @@ answer's time (or `startedAt`) plus `perQuestionSeconds`.
 - If a tab is in the background when a question's time runs out, the browser may delay the timer
   past the grace window, and the question is then recorded as unanswered instead of with the
   selected option.
-- No end-to-end test yet.
 
 **With more time**
 
-- A Playwright test of the full take-quiz path, and screenshots or a recording of the attend flow
-  on mobile and desktop.
-- Lazy-load the admin routes, JSON export/import of quizzes, an image upload/URL field for answer
-  options in the builder (options already render an `imageUrl` when present), and i18n.
+- Screenshots or a recording of the attend flow on mobile and desktop.
+- JSON export/import of quizzes, an image upload/URL field for answer options in the builder
+  (options already render an `imageUrl` when present), and i18n.
+- Send caught errors to an error-reporting service instead of only the console.
 - Share the Zod quiz schema with the store.
 
 ## Project conventions
