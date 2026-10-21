@@ -235,15 +235,3 @@ answer's time (or `startedAt`) plus `perQuestionSeconds`.
   past the grace window, and the question is then recorded as unanswered instead of with the
   selected option.
 
-**With more time**
-
-- Screenshots or a recording of the attend flow on mobile and desktop.
-- An image upload/URL field for answer options in the builder (options already render an
-  `imageUrl` when present), exporting a single quiz, and i18n.
-- Send caught errors to an error-reporting service instead of only the console.
-- Share the Zod quiz schema with the store.
-
-## Project conventions
-
-See `CLAUDE.md` for the code standards used in this repository (naming, hooks, testing,
-accessibility).

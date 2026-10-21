@@ -40,7 +40,8 @@ export function QuestionView({
         <h2
           ref={headingRef}
           tabIndex={-1}
-          className="font-display text-[1.75rem] leading-[1.12] font-extrabold tracking-tight outline-none sm:text-4xl lg:text-[2.75rem]"
+          // wrap-anywhere lets one very long word break instead of pushing the page wider than the screen.
+          className="font-display text-[1.75rem] leading-[1.12] font-extrabold tracking-tight wrap-anywhere outline-none sm:text-4xl lg:text-[2.75rem]"
         >
           {question.text}
         </h2>
@@ -72,7 +73,9 @@ export function QuestionView({
             {option.imageUrl && (
               <img src={option.imageUrl} alt="" className="size-16 rounded-lg object-cover" />
             )}
-            <span className="flex-1 text-[1.05rem] font-semibold sm:text-lg">{option.text}</span>
+            <span className="min-w-0 flex-1 text-[1.05rem] font-semibold wrap-anywhere sm:text-lg">
+              {option.text}
+            </span>
             <CheckIcon size={22} className="hidden shrink-0 peer-checked:block" />
           </label>
         ))}

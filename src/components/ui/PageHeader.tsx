@@ -26,13 +26,16 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         {eyebrow ? <p className={eyebrowClass}>{eyebrow}</p> : null}
-        <h1 id={headingId} className={`${displayClass} leading-[1.02] ${titleSizes[size]}`}>
+        <h1
+          id={headingId}
+          className={`${displayClass} leading-[1.02] wrap-anywhere ${titleSizes[size]}`}
+        >
           {title}
         </h1>
         {typeof description === 'string' ? (
-          <p className="text-muted">{description}</p>
+          <p className="wrap-anywhere text-muted">{description}</p>
         ) : (
           description
         )}
