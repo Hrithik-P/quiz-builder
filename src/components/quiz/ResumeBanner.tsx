@@ -10,7 +10,7 @@ interface ResumeBannerProps {
 }
 
 export function ResumeBanner({ quiz, attempt }: ResumeBannerProps) {
-  const answered = attempt.currentQuestionIndex
+  const answered = attempt.answers.length
   const total = attempt.totalQuestions
 
   return (

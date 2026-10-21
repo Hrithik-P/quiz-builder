@@ -7,7 +7,6 @@ interface QuizTransferButtonsProps {
   onImportFile: (file: File) => void
 }
 
-/** "Export all" downloads a file; "Import" opens the file picker. */
 export function QuizTransferButtons({
   canExport,
   onExport,

@@ -2,13 +2,15 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 import seedJson from '../data/seed.json'
-import { appendAnswer, finalizeAttempt } from '../services/attempt'
+import { recordAnswer } from '../services/answering'
+import { finalizeAttempt } from '../services/attempt'
 import { getCurrentQuestion, isQuizEdited } from '../services/quizQueries'
 import { buildResult } from '../services/scoring'
 import { getDeadlines, settleAttempt } from '../services/timing'
-import type { Attempt, Database, Question, Quiz, QuizData, QuizInput } from '../types/models'
+import type { Attempt, Database, Quiz, QuizData, QuizInput } from '../types/models'
 import type { AttemptResult, AttemptState } from '../types/views'
 import { createId } from '../utils/createId'
+import { quizDataSchema } from './quizDataSchema'
 
 /** Bump the suffix if the stored shape changes. */
 export const QUIZ_STORAGE_KEY = 'quiz-platform:db:v1'
@@ -22,30 +24,6 @@ function createSeedData(): QuizData {
     quizzes: seed.quizzes,
     attempts: seed.attempts,
   })
-}
-
-const DATA_KEYS = ['countries', 'users', 'quizzes', 'attempts'] as const
-
-/**
- * localStorage is outside our control: it can be cleared halfway, edited by hand, or written by an
- * older version of the app. This only checks the top-level shape, which is what keeps the app from
- * crashing on load; it does not check every field of every record.
- */
-function isQuizData(value: unknown): value is QuizData {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    DATA_KEYS.every((key) => Array.isArray(Reflect.get(value, key)))
-  )
-}
-
-function assertValidSelection(question: Question, optionIds: string[]): void {
-  const knownOptionIds = new Set(question.options.map((option) => option.id))
-  const isKnown = optionIds.every((optionId) => knownOptionIds.has(optionId))
-  const hasTooMany = question.type === 'single' && optionIds.length > 1
-  // An empty selection is valid: it is what a timeout submits when nothing was chosen.
-  if (!isKnown || hasTooMany)
-    throw new Error('The selected options are not valid for this question.')
 }
 
 export type StartAttemptResult =
@@ -64,12 +42,11 @@ interface QuizActions {
   refreshAttempt: (attemptId: string) => void
   /**
    * Records the answer for the current question and returns what to show next. A submission for a
-   * question that is no longer current (a double click, a stale tab) changes nothing.
+   * question that is no longer current (a double click, a stale tab) records nothing.
    */
   submitAnswer: (attemptId: string, questionId: string, optionIds: string[]) => AttemptState
   /** Idempotent: a completed attempt returns its stored result. */
   completeAttempt: (attemptId: string) => AttemptResult | undefined
-  /** Restores the seed data. */
   resetData: () => void
 }
 
@@ -188,26 +165,11 @@ export const useQuizStore = create<QuizStore>()(
         },
 
         submitAnswer: (attemptId, questionId, optionIds) => {
-          get().refreshAttempt(attemptId)
-          const nowMs = Date.now()
           const { attempt, quiz } = findAttemptWithQuiz(attemptId)
-          const current = getCurrentQuestion(get(), attemptId)
-          if (current.status !== 'question' || !attempt || !quiz) return current
-
-          const question = quiz.questions[attempt.answers.length]
-          if (!question || question.id !== questionId) return current
-          assertValidSelection(question, optionIds)
-
-          // A submission accepted in the grace window counts as made at the deadline.
-          const { overallEndsAtMs, questionEndsAtMs } = getDeadlines(attempt, quiz)
-          const answeredAtMs = Math.min(nowMs, overallEndsAtMs ?? nowMs, questionEndsAtMs ?? nowMs)
-
-          let updated = appendAnswer(attempt, quiz, optionIds, answeredAtMs)
-          const isOutOfTime = overallEndsAtMs !== null && nowMs >= overallEndsAtMs
-          if (updated.answers.length >= quiz.questions.length || isOutOfTime) {
-            updated = finalizeAttempt(updated, quiz, answeredAtMs)
+          if (attempt && quiz) {
+            const updated = recordAnswer(attempt, quiz, questionId, optionIds, Date.now())
+            if (updated !== attempt) replaceAttempt(updated)
           }
-          replaceAttempt(updated)
           return getCurrentQuestion(get(), attemptId)
         },
 
@@ -234,9 +196,13 @@ export const useQuizStore = create<QuizStore>()(
     {
       name: QUIZ_STORAGE_KEY,
       version: 1,
-      // Saved data that is not shaped like our data is ignored, and the seed is used instead.
-      merge: (persisted, current) =>
-        isQuizData(persisted) ? { ...current, ...persisted } : current,
+      // localStorage is outside our control: it can be cleared halfway, edited by hand, or written
+      // by an older version of the app. Every record is checked, because one bad record would
+      // otherwise crash every screen that lists it. If anything fails, the seed is used instead.
+      merge: (persisted, current) => {
+        const parsed = quizDataSchema.safeParse(persisted)
+        return parsed.success ? { ...current, ...parsed.data } : current
+      },
       // Only the data is saved, never the actions.
       partialize: ({ countries, users, quizzes, attempts }): QuizData => ({
         countries,

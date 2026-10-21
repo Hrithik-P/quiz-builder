@@ -3,8 +3,8 @@ import { useQuizData } from '../store/quizStore'
 import type { QuizData } from '../types/models'
 
 /**
- * Reads from the store, but shows a loading state for `delayMs` the first time `key` is seen (the
- * simulated delay). Later changes to the data show up straight away, with no loading flash.
+ * Reads from the store, but shows a loading state for `delayMs` whenever `key` changes (the
+ * simulated delay). Changes to the data itself show up straight away, with no loading flash.
  */
 export function useServiceData<Result>(
   key: string,

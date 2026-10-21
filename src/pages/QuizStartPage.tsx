@@ -46,7 +46,7 @@ export function QuizStartPage() {
             <QuizFacts quiz={quiz} />
             {inProgress ? (
               <Notice tone="accent">
-                You have an unfinished attempt (question {inProgress.currentQuestionIndex + 1} of{' '}
+                You have an unfinished attempt (question {inProgress.answers.length + 1} of{' '}
                 {inProgress.totalQuestions}). Time kept running while you were away.
               </Notice>
             ) : null}

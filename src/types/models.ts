@@ -63,6 +63,7 @@ export interface Attempt {
   userId: string
   status: AttemptStatus
   startedAt: string
+  /** Kept for the seed's shape and always equal to `answers.length`, which is what the app reads. */
   currentQuestionIndex: number
   answers: Answer[]
   completedAt: string | null

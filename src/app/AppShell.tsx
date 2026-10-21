@@ -31,7 +31,6 @@ interface AppShellProps {
   renderControls: (surface: ShellSurface) => ReactNode
   /** Full-screen content with no navigation, such as the attempt screen. */
   focusMode?: boolean
-  /** The page to show next to the navigation. */
   children: ReactNode
 }
 

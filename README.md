@@ -40,8 +40,10 @@ quiz without retakes and the seed attempt that has already run out of time.
   survives reloads.
 - **Unreadable data:** what comes out of localStorage is not trusted. If it is not valid JSON or
   not shaped like the app's data (cleared halfway, edited by hand, an older version), it is
-  ignored, the seed is used, and storage is rewritten with valid data. Only the top-level shape is
-  checked, not every field of every record.
+  ignored, the seed is used, and storage is rewritten with valid data. Every record is checked
+  with a Zod schema (`src/store/quizDataSchema.ts`): field types, timestamps that parse, and
+  whole, non-negative counts. One bad record is enough to fall back to the seed, because it would
+  otherwise crash every screen that lists it.
 - **Current user:** the user picked in the switcher is saved under `quiz-platform:session:v1`, so a
   reload (or closing the tab and coming back) keeps the same person and their attempts. "Reset
   data" does not change it.
@@ -61,8 +63,9 @@ pages / hooks  ->  useQuizStore (data + actions, persisted)
   the actions that change them. The `persist` middleware saves it to localStorage (data only,
   never the actions).
 - `src/services/`: pure functions with no storage and no clock of their own. `quizQueries.ts` reads
-  from the data, `scoring.ts`, `timing.ts`, `attempt.ts` and `leaderboard.ts` do the maths. Time is
-  passed in, so they are easy to test.
+  from the data, `scoring.ts`, `timing.ts`, `attempt.ts` and `leaderboard.ts` do the maths, and
+  `answering.ts` records an answer (deadlines, grace window, completion). Time is passed in, so
+  they are easy to test, and recording an answer is a single save.
 - `src/hooks/`: attempt and timer logic: `useQuizAttempt` (connects the attend screen to the
   store), `useCountdown` (remaining time from a deadline), `useServiceData` (simulated loading
   delay), `useUnsavedChangesGuard`.
@@ -234,4 +237,3 @@ answer's time (or `startedAt`) plus `perQuestionSeconds`.
 - If a tab is in the background when a question's time runs out, the browser may delay the timer
   past the grace window, and the question is then recorded as unanswered instead of with the
   selected option.
-

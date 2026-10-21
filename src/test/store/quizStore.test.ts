@@ -483,6 +483,22 @@ describe('persistence', () => {
     expect(store().quizzes.map((quiz) => quiz.id)).not.toContain('q1')
   })
 
+  /** The seed as it would be saved, with some records replaced. */
+  function savedSeedWith(changes: Record<string, unknown[]>): string {
+    const { countries, users, quizzes, attempts } = seed
+    return JSON.stringify({
+      state: { countries, users, quizzes, attempts, ...changes },
+      version: 1,
+    })
+  }
+
+  it('accepts the seed as saved data', async () => {
+    localStorage.setItem(QUIZ_STORAGE_KEY, savedSeedWith({ quizzes: seed.quizzes.slice(1) }))
+    await useQuizStore.persist.rehydrate()
+
+    expect(store().quizzes.map((quiz) => quiz.id)).toEqual(['q2', 'q3', 'q4', 'q5'])
+  })
+
   describe('saved data that cannot be used', () => {
     async function loadStoreWithSavedValue(saved: string) {
       localStorage.setItem(QUIZ_STORAGE_KEY, saved)
@@ -497,6 +513,15 @@ describe('persistence', () => {
         JSON.stringify({ state: { quizzes: null, users: 'x' }, version: 1 }),
       ],
       ['JSON that is not an object', JSON.stringify({ state: 'oops', version: 1 })],
+      ['a quiz record with missing fields', savedSeedWith({ quizzes: [...seed.quizzes, {}] })],
+      [
+        'an attempt whose start time is not a date',
+        savedSeedWith({ attempts: [{ ...seed.attempts[0], startedAt: 'yesterday' }] }),
+      ],
+      [
+        'an attempt with a negative question count',
+        savedSeedWith({ attempts: [{ ...seed.attempts[0], totalQuestions: -1 }] }),
+      ],
     ])('falls back to the seed for %s and repairs storage', async (_label, saved) => {
       const { useQuizStore: freshStore } = await loadStoreWithSavedValue(saved)
 
