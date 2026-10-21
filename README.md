@@ -42,6 +42,9 @@ quiz without retakes and the seed attempt that has already run out of time.
   not shaped like the app's data (cleared halfway, edited by hand, an older version), it is
   ignored, the seed is used, and storage is rewritten with valid data. Only the top-level shape is
   checked, not every field of every record.
+- **Current user:** the user picked in the switcher is saved under `quiz-platform:session:v1`, so a
+  reload (or closing the tab and coming back) keeps the same person and their attempts. "Reset
+  data" does not change it.
 - **Reset:** the "Reset data" button on the admin page (with a confirmation) puts the seed back.
 - **Who saves it:** the Zustand `persist` middleware in `src/store/quizStore.ts`. Components never
   read or write browser storage; they use the store. A change in one tab is picked up by the other
@@ -225,6 +228,9 @@ answer's time (or `startedAt`) plus `perQuestionSeconds`.
   tabs save within a few milliseconds of each other, the last one wins.
 - There is no real authentication: the user switcher trusts whoever uses it. Quiz input is
   validated in the form (Zod); the store does not re-validate it.
+- An attempt link (`/quiz/:quizId/attempt/:attemptId`) only opens for the person who owns the
+  attempt and for the quiz named in the link. Otherwise it shows "Attempt not found". This is a
+  courtesy, not security: with no real login, anyone can switch to any user.
 - If a tab is in the background when a question's time runs out, the browser may delay the timer
   past the grace window, and the question is then recorded as unanswered instead of with the
   selected option.
