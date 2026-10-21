@@ -405,6 +405,43 @@ describe('persistence', () => {
     expect(store().quizzes.map((quiz) => quiz.id)).not.toContain('q1')
   })
 
+  describe('saved data that cannot be used', () => {
+    async function loadStoreWithSavedValue(saved: string) {
+      localStorage.setItem(QUIZ_STORAGE_KEY, saved)
+      vi.resetModules()
+      return import('../../store/quizStore')
+    }
+
+    it.each([
+      ['text that is not JSON', '{not valid json'],
+      [
+        'JSON of the wrong shape',
+        JSON.stringify({ state: { quizzes: null, users: 'x' }, version: 1 }),
+      ],
+      ['JSON that is not an object', JSON.stringify({ state: 'oops', version: 1 })],
+    ])('falls back to the seed for %s and repairs storage', async (_label, saved) => {
+      const { useQuizStore: freshStore } = await loadStoreWithSavedValue(saved)
+
+      expect(freshStore.getState().quizzes).toHaveLength(5)
+      expect(freshStore.getState().users).toHaveLength(5)
+      const repaired = JSON.parse(localStorage.getItem(QUIZ_STORAGE_KEY) ?? '{}') as {
+        state?: { quizzes?: Quiz[] }
+      }
+      expect(repaired.state?.quizzes).toHaveLength(5)
+    })
+
+    it('still restores data that is valid', async () => {
+      const saved = JSON.stringify({
+        state: { countries: [], users: seed.users, quizzes: [], attempts: [] },
+        version: 1,
+      })
+      const { useQuizStore: freshStore } = await loadStoreWithSavedValue(saved)
+
+      expect(freshStore.getState().quizzes).toEqual([])
+      expect(freshStore.getState().users).toHaveLength(5)
+    })
+  })
+
   it('picks up a change saved by another tab', async () => {
     const otherTab = {
       state: {

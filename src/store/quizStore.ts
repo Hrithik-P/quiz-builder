@@ -23,6 +23,21 @@ function createSeedData(): QuizData {
   })
 }
 
+const DATA_KEYS = ['countries', 'users', 'quizzes', 'attempts'] as const
+
+/**
+ * localStorage is outside our control: it can be cleared halfway, edited by hand, or written by an
+ * older version of the app. This only checks the top-level shape, which is what keeps the app from
+ * crashing on load; it does not check every field of every record.
+ */
+function isQuizData(value: unknown): value is QuizData {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    DATA_KEYS.every((key) => Array.isArray(Reflect.get(value, key)))
+  )
+}
+
 function newId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
 }
@@ -210,6 +225,9 @@ export const useQuizStore = create<QuizStore>()(
     {
       name: QUIZ_STORAGE_KEY,
       version: 1,
+      // Saved data that is not shaped like our data is ignored, and the seed is used instead.
+      merge: (persisted, current) =>
+        isQuizData(persisted) ? { ...current, ...persisted } : current,
       // Only the data is saved, never the actions.
       partialize: ({ countries, users, quizzes, attempts }): QuizData => ({
         countries,
@@ -221,8 +239,9 @@ export const useQuizStore = create<QuizStore>()(
   ),
 )
 
-// `persist` only saves when state changes. Write the seed once so storage holds it from the first load.
-if (localStorage.getItem(QUIZ_STORAGE_KEY) === null) useQuizStore.setState({})
+// `persist` only saves when state changes. Write once at load, so storage starts out valid: it holds
+// the seed on a first visit, and it replaces anything that could not be read.
+useQuizStore.setState({})
 
 // The browser fires `storage` in the other open tabs when this tab saves. Re-read, so a tab never
 // shows old data or saves its stale copy over the other tab's changes.
