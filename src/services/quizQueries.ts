@@ -87,6 +87,21 @@ export function getInProgressAttempt(
   )
 }
 
+/**
+ * The attempt named in a URL, but only when it is this user's attempt at this quiz. Without the
+ * check, a link could show one quiz's questions under another quiz's title, or let someone open
+ * and answer another person's attempt.
+ */
+export function getAttemptFor(
+  data: QuizData,
+  attemptId: string,
+  quizId: string,
+  userId: string,
+): Attempt | undefined {
+  const attempt = data.attempts.find((candidate) => candidate.id === attemptId)
+  return attempt?.quizId === quizId && attempt.userId === userId ? attempt : undefined
+}
+
 export function getResult(data: QuizData, attemptId: string): AttemptResult | undefined {
   const attempt = data.attempts.find((candidate) => candidate.id === attemptId)
   return attempt && buildResult(attempt)

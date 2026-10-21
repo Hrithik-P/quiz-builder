@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { getCurrentQuestion, getQuizInfo } from '../services/quizQueries'
+import { getAttemptFor, getCurrentQuestion, getQuizInfo } from '../services/quizQueries'
 import { useQuizData, useQuizStore } from '../store/quizStore'
 import { useSessionStore } from '../store/sessionStore'
 import type { AttemptState } from '../types/views'
@@ -22,11 +22,13 @@ export function useQuizAttempt(quizId: string, attemptId: string) {
   const submitAnswer = useQuizStore((state) => state.submitAnswer)
   const navigate = useNavigate()
   const isNewAttempt = attemptId === NEW_ATTEMPT_ID
+  // The URL names the attempt, so check it really is this user's attempt at this quiz.
+  const isOwnAttempt = getAttemptFor(data, attemptId, quizId, userId) !== undefined
 
   useEffect(() => {
     if (!isNewAttempt) {
       // Opening an attempt applies the time that passed while the user was away.
-      refreshAttempt(attemptId)
+      if (isOwnAttempt) refreshAttempt(attemptId)
       return
     }
     const result = startOrResumeAttempt(quizId, userId)
@@ -34,11 +36,22 @@ export function useQuizAttempt(quizId: string, attemptId: string) {
     navigate(result.ok ? `/quiz/${quizId}/attempt/${result.attempt.id}` : `/quiz/${quizId}`, {
       replace: true,
     })
-  }, [isNewAttempt, attemptId, quizId, userId, startOrResumeAttempt, refreshAttempt, navigate])
+  }, [
+    isNewAttempt,
+    isOwnAttempt,
+    attemptId,
+    quizId,
+    userId,
+    startOrResumeAttempt,
+    refreshAttempt,
+    navigate,
+  ])
 
   const view: QuizAttemptView = isNewAttempt
     ? { status: 'loading' }
-    : getCurrentQuestion(data, attemptId)
+    : isOwnAttempt
+      ? getCurrentQuestion(data, attemptId)
+      : { status: 'not_found' }
 
   return {
     view,

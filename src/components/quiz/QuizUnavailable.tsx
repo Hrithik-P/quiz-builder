@@ -3,13 +3,17 @@ import { Button } from '../ui/Button'
 import { EmptyState } from '../ui/EmptyState'
 
 interface QuizUnavailableProps {
-  reason: 'not-found' | 'deleted' | 'edited'
+  reason: 'not-found' | 'attempt-not-found' | 'deleted' | 'edited'
 }
 
 const messages: Record<QuizUnavailableProps['reason'], { title: string; description: string }> = {
   'not-found': {
     title: 'Quiz not found',
     description: 'This quiz does not exist. It may have been removed.',
+  },
+  'attempt-not-found': {
+    title: 'Attempt not found',
+    description: 'This attempt does not exist, or it belongs to a different quiz or person.',
   },
   deleted: {
     title: 'This quiz was deleted',

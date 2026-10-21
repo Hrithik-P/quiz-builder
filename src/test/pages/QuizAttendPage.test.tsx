@@ -235,6 +235,49 @@ describe('quiz changed during an attempt', () => {
 
   it('shows not found for an attempt that does not exist', () => {
     renderAttempt('missing', 'q1')
-    expect(screen.getByText('Quiz not found')).toBeInTheDocument()
+    expect(screen.getByText('Attempt not found')).toBeInTheDocument()
+  })
+})
+
+describe('an attempt link that does not match the quiz or the user', () => {
+  it('does not show one quiz’s questions under another quiz', () => {
+    setUser('u5')
+    const attempt = startAttempt('q4', 'u5')
+
+    renderAttempt(attempt.id, 'q1')
+
+    expect(screen.getByText('Attempt not found')).toBeInTheDocument()
+    expect(screen.queryByText(/Question \d of \d/)).not.toBeInTheDocument()
+  })
+
+  it('does not let someone open another person’s attempt', () => {
+    setUser('u5')
+    const attempt = startAttempt('q1', 'u5')
+    setUser('u2')
+
+    renderAttempt(attempt.id, 'q1')
+
+    expect(screen.getByText('Attempt not found')).toBeInTheDocument()
+    expect(screen.queryByText(/Question \d of \d/)).not.toBeInTheDocument()
+  })
+
+  it('leaves the attempt untouched when the link is wrong', () => {
+    setUser('u5')
+    const attempt = startAttempt('q2', 'u5')
+    advance(100)
+
+    renderAttempt(attempt.id, 'q1')
+
+    // Opening the right link would have applied the 100 seconds that passed. This one must not.
+    expect(inProgressAttempt('q2', 'u5')?.answers).toHaveLength(0)
+  })
+
+  it('still opens the person’s own attempt through the right link', () => {
+    setUser('u5')
+    const attempt = startAttempt('q1', 'u5')
+
+    renderAttempt(attempt.id, 'q1')
+
+    expect(screen.getByText('Question 1 of 6')).toBeInTheDocument()
   })
 })

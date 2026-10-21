@@ -19,7 +19,7 @@ export function QuizAttendPage() {
     case 'not_found':
       return (
         <div className="mx-auto max-w-2xl p-4 pt-10">
-          <QuizUnavailable reason="not-found" />
+          <QuizUnavailable reason="attempt-not-found" />
         </div>
       )
     case 'quiz_unavailable':
