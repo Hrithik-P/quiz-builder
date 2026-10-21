@@ -95,6 +95,6 @@ describe('lazy-loaded admin pages', () => {
     renderApp('/admin')
 
     expect(await screen.findByRole('heading', { name: 'Manage quizzes' })).toBeInTheDocument()
-    expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: 'Admin' })).toBeInTheDocument()
   })
 })

@@ -65,15 +65,23 @@ pages / hooks  ->  useQuizStore (data + actions, persisted)
   delay), `useUnsavedChangesGuard`.
 - `src/pages/` are thin: they compose hooks and components. `src/components/` has `ui/`
   (domain-agnostic building blocks) and feature folders.
-- `src/app/` has the route table (`routes.tsx`), the layout and the error page.
+- `src/app/` has the route table (`routes.tsx`), the shell and its two layouts, and the error page.
 
-**Bundle.** The admin screens (the form, validation and drag-and-drop libraries) are lazy-loaded
-the first time they are visited, and the React and UI libraries are split into their own cached
+**Two areas, one shell.** The app is split into a learner area (`/`: quizzes, results, leaderboard)
+and an admin area (`/admin`: manage, create and edit quizzes). Both use the same `AppShell`, so
+they look the same: it draws the skip link, the mobile header, the side panel or bottom navigation,
+and the main area. Each area only passes in what differs: its navigation items, a link to the other
+area, and its controls (`LearnerLayout` adds the user switcher; `AdminLayout` does not need one,
+because admin actions do not depend on the current user). The page itself is the shell's `children`.
+There is no role check: this separates the two jobs, it is not access control, and anyone can open
+either area.
+**Bundle.** The admin area (its layout and screens, with the form, validation and drag-and-drop
+libraries) is lazy-loaded the first time it is visited, and the React and UI libraries are split into their own cached
 chunks. First load went from 741 kB (231 kB gzipped) to about 538 kB (169 kB gzipped), and no chunk
 is over 500 kB.
 
-**Error handling.** React Router error boundaries sit in two places: around the screens, so a
-crash is shown inside the app shell and the navigation keeps working, and around the shell itself.
+**Error handling.** Each area has React Router error boundaries in two places: around its screens,
+so a crash is shown inside the shell and the navigation keeps working, and around the shell itself.
 The page shows a plain message with "Try again" and "Back to quizzes", never the raw error or
 stack, which are logged to the console instead. A lazy chunk that fails to download gets its own
 message. Boundaries only catch errors thrown while rendering (and loading a route); errors in event
