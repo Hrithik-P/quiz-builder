@@ -348,6 +348,62 @@ describe('admin changes', () => {
     expect(getQuizzes(store(), 'u1', 'GB').map((quiz) => quiz.id)).toContain(created.id)
   })
 
+  describe('importQuizzes', () => {
+    it('adds every quiz as a new copy with its own id', () => {
+      const inputs = [toInput(getFullQuiz('q1')), toInput(getFullQuiz('q2'))]
+      const imported = store().importQuizzes(inputs)
+
+      expect(imported).toHaveLength(2)
+      expect(store().quizzes).toHaveLength(7)
+      expect(new Set(store().quizzes.map((quiz) => quiz.id)).size).toBe(7)
+      expect(imported.map((quiz) => quiz.title)).toEqual([
+        'JavaScript Basics',
+        'React Fundamentals',
+      ])
+      expect(imported.every((quiz) => quiz.revision === 0)).toBe(true)
+    })
+
+    it('makes two copies when the same file is imported twice', () => {
+      const inputs = [toInput(getFullQuiz('q1'))]
+      store().importQuizzes(inputs)
+      store().importQuizzes(inputs)
+
+      const titles = store().quizzes.map((quiz) => quiz.title)
+      expect(titles.filter((title) => title === 'JavaScript Basics')).toHaveLength(3)
+    })
+
+    it('leaves existing quizzes and every attempt alone', () => {
+      const quizzesBefore = store().quizzes
+      const attemptsBefore = store().attempts
+      store().importQuizzes([toInput(getFullQuiz('q1'))])
+
+      expect(store().quizzes.slice(0, quizzesBefore.length)).toEqual(quizzesBefore)
+      expect(store().attempts).toEqual(attemptsBefore)
+    })
+
+    it('does not share objects with the input, so editing one cannot change the other', () => {
+      const input = toInput(getFullQuiz('q1'))
+      const [imported] = store().importQuizzes([input])
+
+      expect(imported?.questions).toEqual(input.questions)
+      expect(imported?.questions).not.toBe(input.questions)
+    })
+
+    it('saves all of them to storage in one write', () => {
+      store().importQuizzes([toInput(getFullQuiz('q1')), toInput(getFullQuiz('q2'))])
+
+      const saved = JSON.parse(localStorage.getItem(QUIZ_STORAGE_KEY) ?? '{}') as {
+        state?: { quizzes?: Quiz[] }
+      }
+      expect(saved.state?.quizzes).toHaveLength(7)
+    })
+
+    it('does nothing for an empty list', () => {
+      expect(store().importQuizzes([])).toEqual([])
+      expect(store().quizzes).toHaveLength(5)
+    })
+  })
+
   it('updates a quiz and bumps its revision', () => {
     store().updateQuiz('q1', { ...toInput(getFullQuiz('q1')), title: 'New' })
     expect(getFullQuiz('q1')).toMatchObject({ title: 'New', revision: 1 })

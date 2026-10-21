@@ -56,6 +56,8 @@ export type StartAttemptResult =
 
 interface QuizActions {
   createQuiz: (input: QuizInput) => Quiz
+  /** Adds every quiz as a new copy in one save, so other tabs see all of them at once. */
+  importQuizzes: (inputs: QuizInput[]) => Quiz[]
   updateQuiz: (quizId: string, input: QuizInput) => void
   /** Attempts are kept, so an in-progress attempt can say its quiz was deleted. */
   deleteQuiz: (quizId: string) => void
@@ -105,6 +107,16 @@ export const useQuizStore = create<QuizStore>()(
           const quiz: Quiz = { ...structuredClone(input), id: newId('quiz'), revision: 0 }
           set((state) => ({ quizzes: [...state.quizzes, quiz] }))
           return quiz
+        },
+
+        importQuizzes: (inputs) => {
+          const imported = inputs.map((input): Quiz => ({
+            ...structuredClone(input),
+            id: newId('quiz'),
+            revision: 0,
+          }))
+          set((state) => ({ quizzes: [...state.quizzes, ...imported] }))
+          return imported
         },
 
         updateQuiz: (quizId, input) => {
