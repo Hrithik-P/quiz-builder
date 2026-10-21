@@ -1,18 +1,15 @@
 import type { Option, Question, Quiz, QuizInput } from '../../types/models'
+import { createId } from '../../utils/createId'
 
 export type QuizDraft = QuizInput
 
-function newId(prefix: string): string {
-  return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
-}
-
 export function createOption(): Option {
-  return { id: newId('opt'), text: '' }
+  return { id: createId('opt'), text: '' }
 }
 
 export function createQuestion(): Question {
   return {
-    id: newId('question'),
+    id: createId('question'),
     text: '',
     type: 'single',
     options: [createOption(), createOption()],

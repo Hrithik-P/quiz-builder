@@ -424,6 +424,28 @@ describe('admin changes', () => {
   })
 })
 
+describe('on a plain-http page, where crypto.randomUUID does not exist', () => {
+  beforeEach(() => {
+    vi.stubGlobal('crypto', { getRandomValues: crypto.getRandomValues.bind(crypto) })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('still starts an attempt', () => {
+    expect(startAttempt('q1', 'u5').id).toMatch(/^attempt-/)
+  })
+
+  it('still creates and imports quizzes', () => {
+    const created = store().createQuiz(toInput(getFullQuiz('q1')))
+    const [imported] = store().importQuizzes([toInput(getFullQuiz('q2'))])
+
+    expect(created.id).toMatch(/^quiz-/)
+    expect(imported?.id).toMatch(/^quiz-/)
+  })
+})
+
 describe('persistence', () => {
   it('copies the seed into localStorage on first load', async () => {
     localStorage.clear()

@@ -1,5 +1,9 @@
-import { describe, expect, it } from 'vitest'
-import { createQuestion, describeQuestion } from '../../../components/admin/quizDraft'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import {
+  createEmptyDraft,
+  createQuestion,
+  describeQuestion,
+} from '../../../components/admin/quizDraft'
 
 describe('describeQuestion', () => {
   it('summarises the text, type and option count', () => {
@@ -11,5 +15,23 @@ describe('describeQuestion', () => {
     expect(describeQuestion(createQuestion())).toBe(
       'No question text yet · Single choice · 2 options',
     )
+  })
+})
+
+describe('a new quiz form on a plain-http page, where crypto.randomUUID does not exist', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('still builds a blank quiz with ids for its question and options', () => {
+    vi.stubGlobal('crypto', { getRandomValues: crypto.getRandomValues.bind(crypto) })
+
+    const [question] = createEmptyDraft().questions
+
+    expect(question?.id).toMatch(/^question-/)
+    expect(question?.options.map((option) => option.id)).toEqual([
+      expect.stringMatching(/^opt-/),
+      expect.stringMatching(/^opt-/),
+    ])
   })
 })

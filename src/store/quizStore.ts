@@ -8,6 +8,7 @@ import { buildResult } from '../services/scoring'
 import { getDeadlines, settleAttempt } from '../services/timing'
 import type { Attempt, Database, Question, Quiz, QuizData, QuizInput } from '../types/models'
 import type { AttemptResult, AttemptState } from '../types/views'
+import { createId } from '../utils/createId'
 
 /** Bump the suffix if the stored shape changes. */
 export const QUIZ_STORAGE_KEY = 'quiz-platform:db:v1'
@@ -36,10 +37,6 @@ function isQuizData(value: unknown): value is QuizData {
     value !== null &&
     DATA_KEYS.every((key) => Array.isArray(Reflect.get(value, key)))
   )
-}
-
-function newId(prefix: string): string {
-  return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
 }
 
 function assertValidSelection(question: Question, optionIds: string[]): void {
@@ -104,7 +101,7 @@ export const useQuizStore = create<QuizStore>()(
         ...createSeedData(),
 
         createQuiz: (input) => {
-          const quiz: Quiz = { ...structuredClone(input), id: newId('quiz'), revision: 0 }
+          const quiz: Quiz = { ...structuredClone(input), id: createId('quiz'), revision: 0 }
           set((state) => ({ quizzes: [...state.quizzes, quiz] }))
           return quiz
         },
@@ -112,7 +109,7 @@ export const useQuizStore = create<QuizStore>()(
         importQuizzes: (inputs) => {
           const imported = inputs.map((input): Quiz => ({
             ...structuredClone(input),
-            id: newId('quiz'),
+            id: createId('quiz'),
             revision: 0,
           }))
           set((state) => ({ quizzes: [...state.quizzes, ...imported] }))
@@ -155,7 +152,7 @@ export const useQuizStore = create<QuizStore>()(
             return { ok: false, reason: 'retake_not_allowed' }
 
           const attempt: Attempt = {
-            id: newId('attempt'),
+            id: createId('attempt'),
             quizId,
             userId,
             status: 'in_progress',
