@@ -2,6 +2,7 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
 import { useQuizStore } from '../store/quizStore'
+import { DEFAULT_USER_ID, useSessionStore } from '../store/sessionStore'
 
 // Browser APIs that Radix uses and jsdom lacks.
 globalThis.ResizeObserver ??= class {
@@ -17,5 +18,6 @@ afterEach(() => {
   cleanup()
   // The store lives in memory, so put the seed back before clearing what it saved.
   useQuizStore.getState().resetData()
+  useSessionStore.setState({ userId: DEFAULT_USER_ID })
   localStorage.clear()
 })
