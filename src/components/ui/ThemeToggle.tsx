@@ -17,8 +17,8 @@ const icons: Record<ThemePreference, ReactNode> = {
 }
 
 export function ThemeToggle({ surface = 'light' }: { surface?: 'light' | 'panel' }) {
-  const theme = useThemeStore((s) => s.theme)
-  const setTheme = useThemeStore((s) => s.setTheme)
+  const theme = useThemeStore((state) => state.theme)
+  const setTheme = useThemeStore((state) => state.setTheme)
   const next = order[(order.indexOf(theme) + 1) % order.length] ?? 'system'
 
   return (

@@ -21,13 +21,13 @@ export function ProgressBar({ value, max, label }: ProgressBarProps) {
     >
       {max <= MAX_SEGMENTS ? (
         <div className="flex gap-1.5">
-          {Array.from({ length: max }, (_, i) => (
+          {Array.from({ length: max }, (_segment, index) => (
             <span
-              key={i}
+              key={index}
               className={`h-2.5 flex-1 rounded-full transition-colors duration-300 ${
-                i + 1 < value
+                index + 1 < value
                   ? 'bg-fg'
-                  : i + 1 === value
+                  : index + 1 === value
                     ? 'border-2 border-edge bg-accent'
                     : 'bg-line'
               }`}

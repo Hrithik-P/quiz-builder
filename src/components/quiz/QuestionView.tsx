@@ -50,7 +50,7 @@ export function QuestionView({
         {isMultiple ? 'Pick all that apply' : 'Pick one answer'}
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4">
-        {question.options.map((option, i) => (
+        {question.options.map((option, index) => (
           <label
             key={option.id}
             className="group relative flex min-h-16 cursor-pointer items-center gap-3.5 rounded-2xl border-2 border-edge bg-surface p-2.5 pr-4 shadow-pop transition-[transform,box-shadow,background-color] hover:-translate-x-px hover:-translate-y-px hover:shadow-pop-lg has-checked:translate-x-0.5 has-checked:translate-y-0.5 has-checked:bg-accent has-checked:text-accent-fg has-checked:shadow-pop-sm has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus has-disabled:cursor-not-allowed sm:min-h-20"
@@ -67,7 +67,7 @@ export function QuestionView({
               aria-hidden="true"
               className="grid size-10 shrink-0 place-items-center rounded-xl border-2 border-edge bg-bg font-display text-lg font-extrabold text-fg peer-checked:border-transparent peer-checked:bg-surface sm:size-12 sm:text-xl"
             >
-              {LETTERS[i] ?? i + 1}
+              {LETTERS[index] ?? index + 1}
             </span>
             {option.imageUrl && (
               <img src={option.imageUrl} alt="" className="size-16 rounded-lg object-cover" />

@@ -6,10 +6,10 @@ import { QuizForm } from '../../../components/admin/QuizForm'
 import { createQuestion, type QuizDraft } from '../../../components/admin/quizDraft'
 
 function question(text: string) {
-  const q = createQuestion()
-  const [first, second] = q.options
+  const draftQuestion = createQuestion()
+  const [first, second] = draftQuestion.options
   return {
-    ...q,
+    ...draftQuestion,
     text,
     options: [
       { id: first?.id ?? 'o1', text: 'Yes' },
@@ -108,7 +108,7 @@ describe('QuizForm question accordion', () => {
     const order = () =>
       screen
         .getAllByRole('button', { name: /^Question \d/ })
-        .map((b) => /: (\w+)\?/.exec(b.textContent ?? '')?.[1] ?? 'open')
+        .map((button) => /: (\w+)\?/.exec(button.textContent ?? '')?.[1] ?? 'open')
 
     it('previews the move and only commits it on drop', async () => {
       const { onSubmit } = renderForm()
@@ -131,7 +131,11 @@ describe('QuizForm question accordion', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'Save' }))
       const saved = onSubmit.mock.calls[0]?.[0] as QuizDraft
-      expect(saved.questions.map((q) => q.text)).toEqual(['Second?', 'Third?', 'First?'])
+      expect(saved.questions.map((savedQuestion) => savedQuestion.text)).toEqual([
+        'Second?',
+        'Third?',
+        'First?',
+      ])
     })
 
     it('leaves the order unchanged when the move is cancelled', async () => {
@@ -145,7 +149,11 @@ describe('QuizForm question accordion', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'Save' }))
       const saved = onSubmit.mock.calls[0]?.[0] as QuizDraft
-      expect(saved.questions.map((q) => q.text)).toEqual(['First?', 'Second?', 'Third?'])
+      expect(saved.questions.map((savedQuestion) => savedQuestion.text)).toEqual([
+        'First?',
+        'Second?',
+        'Third?',
+      ])
     })
 
     it('collapses questions while moving and reopens the open one after the drop', async () => {

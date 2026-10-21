@@ -13,7 +13,7 @@ import { formatPercentage } from '../utils/format'
 
 export function QuizStartPage() {
   const { quizId = '' } = useParams()
-  const userId = useSessionStore((s) => s.userId)
+  const userId = useSessionStore((state) => state.userId)
   const quiz = quizService.getQuizSummary(quizId, userId)
 
   if (!quiz) return <QuizUnavailable reason="not-found" />

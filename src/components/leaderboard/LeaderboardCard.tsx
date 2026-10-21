@@ -21,7 +21,7 @@ export function LeaderboardCard({
   limit,
 }: LeaderboardCardProps) {
   const top = ranked.slice(0, limit)
-  const myEntry = ranked.find((e) => e.userId === currentUserId)
+  const myEntry = ranked.find((entry) => entry.userId === currentUserId)
 
   return (
     <div className="flex max-w-4xl flex-col gap-3 rounded-3xl border-2 border-edge bg-surface p-3 sm:p-4">

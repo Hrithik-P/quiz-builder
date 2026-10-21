@@ -1,12 +1,12 @@
 import { useEffect, useEffectEvent, useState } from 'react'
 
 /** Loads after a simulated delay so loading states show. Reloads when `key` changes. */
-export function useServiceData<T>(
+export function useServiceData<Data>(
   key: string,
-  load: () => T,
+  load: () => Data,
   delayMs = 500,
-): { data: T | undefined; loading: boolean } {
-  const [state, setState] = useState<{ key: string; data: T } | null>(null)
+): { data: Data | undefined; loading: boolean } {
+  const [state, setState] = useState<{ key: string; data: Data } | null>(null)
   const onLoaded = useEffectEvent(() => setState({ key, data: load() }))
 
   useEffect(() => {

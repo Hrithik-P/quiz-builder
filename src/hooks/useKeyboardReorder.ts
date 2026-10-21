@@ -6,7 +6,7 @@ interface Move {
   to: number
 }
 
-function moveItem<T>(items: T[], from: number, to: number): T[] {
+function moveItem<Item>(items: Item[], from: number, to: number): Item[] {
   const item = items[from]
   return item === undefined ? items : items.toSpliced(from, 1).toSpliced(to, 0, item)
 }
@@ -15,8 +15,8 @@ function moveItem<T>(items: T[], from: number, to: number): T[] {
  * Space/Enter picks up, arrow keys move, Space/Enter drops, Escape cancels.
  * `items` shows the preview order; `onDrop` runs only on a real drop.
  */
-export function useKeyboardReorder<T extends { id: string }>(
-  items: T[],
+export function useKeyboardReorder<Item extends { id: string }>(
+  items: Item[],
   onDrop: (id: string, toIndex: number) => void,
 ) {
   const [move, setMove] = useState<Move | null>(null)

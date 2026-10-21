@@ -18,7 +18,7 @@ const questionSchema = z
     correctOptionIds: z.array(z.string()),
   })
   .superRefine((question, ctx) => {
-    const optionIds = new Set(question.options.map((o) => o.id))
+    const optionIds = new Set(question.options.map((option) => option.id))
     const correct = question.correctOptionIds.filter((id) => optionIds.has(id))
     const path = ['correctOptionIds']
     if (correct.length === 0) {

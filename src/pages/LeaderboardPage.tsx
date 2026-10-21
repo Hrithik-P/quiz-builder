@@ -14,10 +14,10 @@ const TOP_LIMIT = 10
 export function LeaderboardPage() {
   const params = useParams()
   const navigate = useNavigate()
-  const userId = useSessionStore((s) => s.userId)
+  const userId = useSessionStore((state) => state.userId)
   const quizzes = quizService.getAllQuizzes()
   const quizId = params.quizId ?? quizzes[0]?.id ?? ''
-  const quiz = quizzes.find((q) => q.id === quizId)
+  const quiz = quizzes.find((quiz) => quiz.id === quizId)
   const { data: ranked, loading } = useServiceData(quizId, () => quizService.getLeaderboard(quizId))
 
   return (

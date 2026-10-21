@@ -12,7 +12,7 @@ import { formatClock } from '../utils/format'
 
 export function ResultsPage() {
   const { attemptId = '' } = useParams()
-  const userId = useSessionStore((s) => s.userId)
+  const userId = useSessionStore((state) => state.userId)
   const result = quizService.getResult(attemptId)
   const quiz = result && quizService.getQuiz(result.quizId)
 

@@ -37,7 +37,7 @@ function errorsOf(draft: QuizDraft) {
   const result = quizSchema.safeParse(draft)
   return result.success
     ? {}
-    : Object.fromEntries(result.error.issues.map((i) => [i.path.join('.'), i.message]))
+    : Object.fromEntries(result.error.issues.map((issue) => [issue.path.join('.'), issue.message]))
 }
 
 describe('quizSchema', () => {
@@ -85,7 +85,7 @@ describe('quizSchema', () => {
       'questions.0.correctOptionIds': 'Mark at least one correct option.',
     })
 
-    question.correctOptionIds = question.options.map((o) => o.id)
+    question.correctOptionIds = question.options.map((option) => option.id)
     expect(errorsOf(draft)).toEqual({
       'questions.0.correctOptionIds': 'Single-choice questions need exactly one correct option.',
     })

@@ -27,7 +27,7 @@ export function AdminQuizListPage() {
 
   function confirmDelete() {
     if (!pendingDelete) return
-    setQuizzes((qs) => qs.filter((q) => q.id !== pendingDelete.id))
+    setQuizzes((currentQuizzes) => currentQuizzes.filter((quiz) => quiz.id !== pendingDelete.id))
     setPendingDelete(null)
   }
 

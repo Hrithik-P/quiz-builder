@@ -56,21 +56,21 @@ export function QuestionFields({ index, onRemove }: QuestionFieldsProps) {
     onCorrectChange: (ids: string[]) => void,
     ref: Ref<HTMLButtonElement>,
   ) {
-    return options.fields.map((option, j) => {
-      const optionId = question.options[j]?.id ?? ''
-      const label = `Option ${j + 1} is correct`
+    return options.fields.map((option, optionIndex) => {
+      const optionId = question.options[optionIndex]?.id ?? ''
+      const label = `Option ${optionIndex + 1} is correct`
       return (
         <div key={option.id} className="flex items-start gap-2">
           {isSingle ? (
             <RadioGroupItem
-              ref={j === 0 ? ref : undefined}
+              ref={optionIndex === 0 ? ref : undefined}
               value={optionId}
               aria-label={label}
               className={`${correctClass} text-success`}
             />
           ) : (
             <Checkbox
-              ref={j === 0 ? ref : undefined}
+              ref={optionIndex === 0 ? ref : undefined}
               aria-label={label}
               checked={correct.includes(optionId)}
               onCheckedChange={(checked) =>
@@ -85,14 +85,14 @@ export function QuestionFields({ index, onRemove }: QuestionFieldsProps) {
           )}
           <FormField
             control={control}
-            name={`${name}.options.${j}.text`}
+            name={`${name}.options.${optionIndex}.text`}
             render={({ field }) => (
               <FormItem className="min-w-0 flex-1">
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder={`Option ${j + 1}`}
-                    aria-label={`Option ${j + 1} text`}
+                    placeholder={`Option ${optionIndex + 1}`}
+                    aria-label={`Option ${optionIndex + 1} text`}
                   />
                 </FormControl>
                 <FormMessage />
@@ -102,8 +102,8 @@ export function QuestionFields({ index, onRemove }: QuestionFieldsProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => removeOption(j)}
-            aria-label={`Remove option ${j + 1}`}
+            onClick={() => removeOption(optionIndex)}
+            aria-label={`Remove option ${optionIndex + 1}`}
           >
             <XIcon size={18} />
           </Button>

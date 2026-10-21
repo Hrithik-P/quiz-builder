@@ -12,7 +12,7 @@ describe('seed data', () => {
   })
 
   it('has one in-progress attempt for resume testing', () => {
-    const inProgress = seed.attempts.filter((a) => a.status === 'in_progress')
-    expect(inProgress.map((a) => a.id)).toEqual(['a11'])
+    const inProgress = seed.attempts.filter((attempt) => attempt.status === 'in_progress')
+    expect(inProgress.map((attempt) => attempt.id)).toEqual(['a11'])
   })
 })

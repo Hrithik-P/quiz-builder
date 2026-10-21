@@ -9,8 +9,8 @@ export function LeaderboardSkeleton() {
       aria-label="Loading leaderboard"
       className="flex max-w-4xl flex-col gap-2"
     >
-      {Array.from({ length: ROWS }, (_, i) => (
-        <Skeleton key={i} className="h-14 w-full rounded-xl" />
+      {Array.from({ length: ROWS }, (_row, index) => (
+        <Skeleton key={index} className="h-14 w-full rounded-xl" />
       ))}
     </div>
   )

@@ -15,19 +15,21 @@ import { formatPercentage } from '../utils/format'
 const ALL = 'all'
 
 function progressLine(quizzes: QuizSummary[]): string {
-  const done = quizzes.filter((q) => q.completed)
-  const best = Math.max(...done.map((q) => q.bestPercentage ?? 0))
+  const done = quizzes.filter((quiz) => quiz.completed)
+  const best = Math.max(...done.map((quiz) => quiz.bestPercentage ?? 0))
   const parts = [`${done.length} of ${quizzes.length} quizzes done`]
   if (done.length > 0) parts.push(`best score ${formatPercentage(best)}`)
   return parts.join(' · ')
 }
 
 export function QuizListPage() {
-  const userId = useSessionStore((s) => s.userId)
+  const userId = useSessionStore((state) => state.userId)
   const [country, setCountry] = useState('')
   const countryOptions = [
     { value: ALL, label: 'All' },
-    ...quizService.getCountries().map((c) => ({ value: c.code, label: c.name })),
+    ...quizService
+      .getCountries()
+      .map((countryOption) => ({ value: countryOption.code, label: countryOption.name })),
   ]
   const firstName = quizService.getUser(userId)?.name.split(' ')[0] ?? 'there'
   const { data: quizzes, loading } = useServiceData(`${userId}:${country}`, () =>
@@ -37,7 +39,7 @@ export function QuizListPage() {
   const resumable = quizzes
     ?.map((quiz) => ({ quiz, attempt: quizService.getInProgressAttempt(quiz.id, userId) }))
     .find((entry) => entry.attempt !== undefined)
-  const rest = quizzes?.filter((q) => q.id !== resumable?.quiz.id) ?? []
+  const rest = quizzes?.filter((quiz) => quiz.id !== resumable?.quiz.id) ?? []
 
   return (
     <section aria-labelledby="quiz-list-heading" className="flex flex-col gap-6 sm:gap-8">

@@ -19,7 +19,7 @@ export function LeaderboardPreview({
   currentUserId,
   rows = 4,
 }: LeaderboardPreviewProps) {
-  const myEntry = ranked.find((e) => e.userId === currentUserId)
+  const myEntry = ranked.find((entry) => entry.userId === currentUserId)
 
   return (
     <div className="flex flex-col gap-3 rounded-3xl border-2 border-edge bg-surface p-4 shadow-pop sm:p-5">

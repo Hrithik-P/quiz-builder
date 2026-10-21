@@ -26,10 +26,10 @@ export function ResumeBanner({ quiz, attempt }: ResumeBannerProps) {
         </h2>
         <p className="font-medium">{quiz.description}</p>
         <div aria-hidden="true" className="mt-1 flex max-w-sm gap-1.5">
-          {Array.from({ length: total }, (_, i) => (
+          {Array.from({ length: total }, (_segment, index) => (
             <span
-              key={i}
-              className={`h-2.5 flex-1 rounded-full ${i < answered ? 'bg-tile-fg' : 'bg-tile-fg/20'}`}
+              key={index}
+              className={`h-2.5 flex-1 rounded-full ${index < answered ? 'bg-tile-fg' : 'bg-tile-fg/20'}`}
             />
           ))}
         </div>

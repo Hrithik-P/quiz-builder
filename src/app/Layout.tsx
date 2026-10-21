@@ -34,10 +34,12 @@ function Brand({ onPanel = false }: { onPanel?: boolean }) {
 }
 
 export function Layout() {
-  const userId = useSessionStore((s) => s.userId)
-  const setUserId = useSessionStore((s) => s.setUserId)
+  const userId = useSessionStore((state) => state.userId)
+  const setUserId = useSessionStore((state) => state.setUserId)
   const users = quizService.getUsers()
-  const focusMode = useMatches().some((m) => (m.handle as RouteHandle | undefined)?.focusMode)
+  const focusMode = useMatches().some(
+    (match) => (match.handle as RouteHandle | undefined)?.focusMode,
+  )
   useApplyTheme()
 
   return (

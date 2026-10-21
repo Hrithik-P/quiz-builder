@@ -46,7 +46,7 @@ export function QuestionList({
   onMove,
 }: QuestionListProps) {
   const questions = useWatch<QuizDraft, 'questions'>({ name: 'questions' })
-  const indexOf = (key: UniqueIdentifier) => fields.findIndex((f) => f.id === key)
+  const indexOf = (key: UniqueIdentifier) => fields.findIndex((field) => field.id === key)
 
   // So a click on the handle doesn't start a drag.
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))

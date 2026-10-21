@@ -30,8 +30,8 @@ export function QuizGridSkeleton() {
     <div aria-busy="true" aria-label="Loading quizzes" className="flex flex-col gap-6">
       <Skeleton className="h-44 rounded-3xl" />
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: SKELETON_CARDS }, (_, i) => (
-          <QuizCardSkeleton key={i} />
+        {Array.from({ length: SKELETON_CARDS }, (_card, index) => (
+          <QuizCardSkeleton key={index} />
         ))}
       </div>
     </div>

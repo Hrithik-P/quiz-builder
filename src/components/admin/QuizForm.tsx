@@ -44,8 +44,8 @@ function firstQuestionError(
   if (!question) return null
   if (question.text) return `questions.${index}.text`
   const options = question.options
-  for (let j = 0; Array.isArray(options) && j < options.length; j++) {
-    if (options[j]?.text) return `questions.${index}.options.${j}.text`
+  for (let optionIndex = 0; Array.isArray(options) && optionIndex < options.length; optionIndex++) {
+    if (options[optionIndex]?.text) return `questions.${index}.options.${optionIndex}.text`
   }
   return `questions.${index}.correctOptionIds`
 }
@@ -94,7 +94,9 @@ export function QuizForm({ initial, countries, submitLabel, onSubmit }: QuizForm
       setFocus(topField)
       return
     }
-    const index = questions.fields.findIndex((_, i) => invalid.questions?.[i])
+    const index = questions.fields.findIndex(
+      (_field, fieldIndex) => invalid.questions?.[fieldIndex],
+    )
     const path = firstQuestionError(invalid, index)
     if (!path) return
     setExpandedId(getValues(`questions.${index}.id`))
@@ -102,8 +104,8 @@ export function QuizForm({ initial, countries, submitLabel, onSubmit }: QuizForm
   }
 
   const invalidNumbers = questions.fields
-    .map((_, i) => (errors.questions?.[i] ? i + 1 : null))
-    .filter((n) => n !== null)
+    .map((_field, fieldIndex) => (errors.questions?.[fieldIndex] ? fieldIndex + 1 : null))
+    .filter((questionNumber) => questionNumber !== null)
   const showSummary = submitCount > 0 && Object.keys(errors).length > 0
 
   return (
@@ -246,11 +248,11 @@ export function QuizForm({ initial, countries, submitLabel, onSubmit }: QuizForm
                     value={field.value}
                     onValueChange={field.onChange}
                   >
-                    {countries.map((country, i) => (
+                    {countries.map((country, index) => (
                       <ToggleGroupItem
                         key={country.code}
                         value={country.code}
-                        ref={i === 0 ? field.ref : undefined}
+                        ref={index === 0 ? field.ref : undefined}
                       >
                         {country.name}
                       </ToggleGroupItem>

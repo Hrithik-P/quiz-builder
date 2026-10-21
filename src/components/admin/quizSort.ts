@@ -9,18 +9,19 @@ export const quizSortOptions: { value: QuizSortKey; label: string }[] = [
   { value: 'questions-asc', label: 'Fewest questions' },
 ]
 
-const comparators: Record<QuizSortKey, (a: Quiz, b: Quiz) => number> = {
-  'title-asc': (a, b) => a.title.localeCompare(b.title),
-  'title-desc': (a, b) => b.title.localeCompare(a.title),
-  'questions-desc': (a, b) => b.questions.length - a.questions.length,
-  'questions-asc': (a, b) => a.questions.length - b.questions.length,
+const comparators: Record<QuizSortKey, (first: Quiz, second: Quiz) => number> = {
+  'title-asc': (first, second) => first.title.localeCompare(second.title),
+  'title-desc': (first, second) => second.title.localeCompare(first.title),
+  'questions-desc': (first, second) => second.questions.length - first.questions.length,
+  'questions-asc': (first, second) => first.questions.length - second.questions.length,
 }
 
 export function searchAndSortQuizzes(quizzes: Quiz[], search: string, sort: QuizSortKey): Quiz[] {
   const term = search.trim().toLowerCase()
   return quizzes
     .filter(
-      (q) => q.title.toLowerCase().includes(term) || q.description.toLowerCase().includes(term),
+      (quiz) =>
+        quiz.title.toLowerCase().includes(term) || quiz.description.toLowerCase().includes(term),
     )
     .toSorted(comparators[sort])
 }
