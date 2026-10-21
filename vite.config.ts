@@ -8,13 +8,14 @@ export default defineConfig({
     rolldownOptions: {
       output: {
         // Libraries change far less often than app code, so keep them in their own cached chunk.
+        // Radix and lucide are not grouped: one shared chunk would preload the admin-only primitives
+        // (accordion, dialog, checkbox) on every page instead of loading them with the admin routes.
         codeSplitting: {
           groups: [
             {
               name: 'react-vendor',
               test: /node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/,
             },
-            { name: 'ui-vendor', test: /node_modules[\\/](radix-ui|@radix-ui|lucide-react)[\\/]/ },
           ],
         },
       },

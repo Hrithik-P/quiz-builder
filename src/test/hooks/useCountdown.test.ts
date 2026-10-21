@@ -1,4 +1,5 @@
-import { act, renderHook } from '@testing-library/react'
+import { createElement } from 'react'
+import { act, render, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useCountdown } from '../../hooks/useCountdown'
 
@@ -83,5 +84,26 @@ describe('useCountdown', () => {
     act(() => vi.advanceTimersByTime(60_000))
     expect(result.current).toBeNull()
     expect(onExpire).not.toHaveBeenCalled()
+  })
+
+  // Regression: every 250 ms tick used to re-render the whole attempt screen.
+  it('re-renders the children once per displayed second, not on every tick', () => {
+    let childRenderCount = 0
+    function Child() {
+      childRenderCount += 1
+      return null
+    }
+    function Timer({ endsAt }: { endsAt: string }) {
+      useCountdown(endsAt)
+      return createElement(Child)
+    }
+    render(createElement(Timer, { endsAt: endsInSeconds(10) }))
+    const initialRenderCount = childRenderCount
+
+    // One act per tick: a single act would batch all the updates into one render.
+    for (let tick = 0; tick < 12; tick += 1) {
+      act(() => vi.advanceTimersByTime(250))
+    }
+    expect(childRenderCount - initialRenderCount).toBe(3)
   })
 })

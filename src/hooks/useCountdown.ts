@@ -2,6 +2,10 @@ import { useEffect, useEffectEvent, useState } from 'react'
 
 const TICK_MS = 250
 
+function getSecondsLeft(endsAtMs: number, nowMs: number): number {
+  return Math.max(0, Math.ceil((endsAtMs - nowMs) / 1000))
+}
+
 /**
  * Whole seconds left until `endsAt` (an ISO timestamp), or null when there is no deadline.
  * The value is derived from the clock on every tick, not counted down, so a reload or a throttled
@@ -13,7 +17,16 @@ export function useCountdown(endsAt: string | null, onExpire?: () => void): numb
 
   useEffect(() => {
     if (endsAt === null) return
-    const refresh = () => setNowMs(Date.now())
+    const endsAtMs = Date.parse(endsAt)
+    // Ticks are faster than a second for accuracy, but the caller only re-renders when the
+    // displayed second changes: keeping the previous state lets React skip the render.
+    const refresh = () =>
+      setNowMs((previousMs) => {
+        const currentMs = Date.now()
+        const isSameSecond =
+          getSecondsLeft(endsAtMs, currentMs) === getSecondsLeft(endsAtMs, previousMs)
+        return isSameSecond ? previousMs : currentMs
+      })
     const timer = setInterval(refresh, TICK_MS)
     // Background tabs throttle timers, so catch up the moment the tab is visible again.
     document.addEventListener('visibilitychange', refresh)
@@ -23,8 +36,7 @@ export function useCountdown(endsAt: string | null, onExpire?: () => void): numb
     }
   }, [endsAt])
 
-  const remainingSeconds =
-    endsAt === null ? null : Math.max(0, Math.ceil((Date.parse(endsAt) - nowMs) / 1000))
+  const remainingSeconds = endsAt === null ? null : getSecondsLeft(Date.parse(endsAt), nowMs)
   const isExpired = remainingSeconds === 0
 
   useEffect(() => {

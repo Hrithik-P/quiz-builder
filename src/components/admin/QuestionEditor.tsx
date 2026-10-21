@@ -11,13 +11,12 @@ import { describeQuestion, type QuizDraft } from './quizDraft'
 interface QuestionEditorProps {
   /** Drag id (react-hook-form's row key). */
   sortableId: string
-  /** Accordion item value: the question id. */
-  value: string
   /** Position in the form's `questions` array. */
   index: number
   /** One-based position shown on screen. */
   number: number
-  expanded: boolean
+  /** Question id of the open question; null while the list is being reordered. */
+  expandedId: string | null
   onRemove: () => void
   isKeyboardMoving: boolean
   handleRef: (node: HTMLElement | null) => void
@@ -27,10 +26,9 @@ interface QuestionEditorProps {
 
 export function QuestionEditor({
   sortableId,
-  value,
   index,
   number,
-  expanded,
+  expandedId,
   onRemove,
   isKeyboardMoving,
   handleRef,
@@ -40,6 +38,7 @@ export function QuestionEditor({
   const question = useWatch<QuizDraft, `questions.${number}`>({ name: `questions.${index}` })
   const { errors } = useFormState<QuizDraft>({ name: `questions.${index}` })
   const hasErrors = errors.questions?.[index] !== undefined
+  const expanded = question.id === expandedId
   const {
     attributes,
     listeners,
@@ -51,7 +50,7 @@ export function QuestionEditor({
   } = useSortable({ id: sortableId })
 
   return (
-    <AccordionItem value={value} asChild>
+    <AccordionItem value={question.id} asChild>
       <li
         ref={setNodeRef}
         style={{ transform: CSS.Translate.toString(transform), transition }}

@@ -7,13 +7,15 @@ import {
   useSensors,
   type Announcements,
   type DragEndEvent,
+  type DragStartEvent,
   type Modifier,
   type UniqueIdentifier,
 } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState } from 'react'
-import { useWatch, type FieldArrayWithId } from 'react-hook-form'
+import { useFormContext, type FieldArrayWithId } from 'react-hook-form'
 import { useKeyboardReorder } from '../../hooks/useKeyboardReorder'
+import type { Question } from '../../types/models'
 import { Accordion } from '../ui/Accordion'
 import { QuestionDragPreview } from './QuestionDragPreview'
 import { QuestionEditor } from './QuestionEditor'
@@ -45,17 +47,17 @@ export function QuestionList({
   onRemove,
   onMove,
 }: QuestionListProps) {
-  const questions = useWatch<QuizDraft, 'questions'>({ name: 'questions' })
+  // Read on demand: watching all questions re-rendered the whole list on every keystroke.
+  const { getValues } = useFormContext<QuizDraft>()
   const indexOf = (key: UniqueIdentifier) => fields.findIndex((field) => field.id === key)
 
   // So a click on the handle doesn't start a drag.
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
   const keyboard = useKeyboardReorder(fields, (key, to) => onMove(indexOf(key), to))
 
-  const [draggingKey, setDraggingKey] = useState<string | null>(null)
-  const moving = draggingKey !== null || keyboard.movingId !== null
-  const draggingIndex = draggingKey === null ? -1 : indexOf(draggingKey)
-  const dragging = questions[draggingIndex]
+  // The question can't be edited mid-drag, so a copy taken at drag start is enough for the preview.
+  const [dragging, setDragging] = useState<{ question: Question; number: number } | null>(null)
+  const moving = dragging !== null || keyboard.movingId !== null
 
   const label = (key: UniqueIdentifier) => `question ${indexOf(key) + 1}`
 
@@ -70,8 +72,13 @@ export function QuestionList({
     onDragCancel: ({ active }) => `Drag cancelled, ${label(active.id)} stays where it was.`,
   }
 
+  function handleDragStart({ active }: DragStartEvent) {
+    const index = indexOf(active.id)
+    setDragging({ question: getValues(`questions.${index}`), number: index + 1 })
+  }
+
   function handleDragEnd({ active, over }: DragEndEvent) {
-    setDraggingKey(null)
+    setDragging(null)
     if (over && active.id !== over.id) onMove(indexOf(active.id), indexOf(over.id))
   }
 
@@ -81,9 +88,9 @@ export function QuestionList({
       collisionDetection={closestCenter}
       modifiers={[restrictToVerticalAxis]}
       accessibility={{ announcements, screenReaderInstructions }}
-      onDragStart={({ active }) => setDraggingKey(String(active.id))}
+      onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragCancel={() => setDraggingKey(null)}
+      onDragCancel={() => setDragging(null)}
     >
       <SortableContext items={keyboard.items} strategy={verticalListSortingStrategy}>
         <Accordion
@@ -98,15 +105,13 @@ export function QuestionList({
             {keyboard.items.map((field, position) => {
               // While a keyboard move previews a new order, rows still read their own form data.
               const index = indexOf(field.id)
-              const questionId = questions[index]?.id
               return (
                 <QuestionEditor
                   key={field.id}
                   sortableId={field.id}
                   index={index}
                   number={position + 1}
-                  value={questionId ?? field.id}
-                  expanded={!moving && questionId === expandedId}
+                  expandedId={moving ? null : expandedId}
                   onRemove={() => onRemove(index)}
                   isKeyboardMoving={field.id === keyboard.movingId}
                   handleRef={keyboard.registerHandle(field.id)}
@@ -119,7 +124,9 @@ export function QuestionList({
         </Accordion>
       </SortableContext>
       <DragOverlay>
-        {dragging ? <QuestionDragPreview question={dragging} number={draggingIndex + 1} /> : null}
+        {dragging ? (
+          <QuestionDragPreview question={dragging.question} number={dragging.number} />
+        ) : null}
       </DragOverlay>
       <p className="sr-only" aria-live="assertive">
         {keyboard.announcement}
