@@ -119,11 +119,63 @@ are pure functions over the stored data (`const data = useQuizData()`):
 | Reset data                                                     | `resetData()` store action.                                                                                                                                                                               |
 
 Also: `refreshAttempt(attemptId)` (applies time that passed while an attempt was closed),
-`getResult`, `getBestResult`, `getInProgressAttempt`, `getQuizSummary`.
+`getResult`, `getBestResult`, `getInProgressAttempt`, `getQuizSummary`, and
+`importQuizzes(inputs)` (adds several quizzes in one save, used by the JSON import).
 
 **Remaining time:** the data layer returns each timer's `endsAt` (an ISO timestamp) and
 `totalSeconds`, not a number of seconds left. `useCountdown` turns `endsAt` into the live
 countdown, so it is always computed from the clock and never drifts.
+
+### JSON export and import
+
+The admin page has **Export all** and **Import** buttons. Export downloads every quiz as
+`quizzes-YYYY-MM-DD.json`. Import accepts a `.json` file with one quiz or many.
+
+```json
+{
+  "format": "quiz-platform/quizzes",
+  "version": 1,
+  "exportedAt": "2026-10-21T10:00:00.000Z",
+  "quizzes": [
+    {
+      "title": "JavaScript Basics",
+      "description": "Core language concepts.",
+      "countries": ["IN", "GB"],
+      "timeLimitSeconds": 300,
+      "perQuestionSeconds": null,
+      "retakesAllowed": true,
+      "questions": [
+        {
+          "id": "q1-1",
+          "text": "Which keyword declares a constant?",
+          "type": "single",
+          "options": [
+            { "id": "q1-1-o1", "text": "var" },
+            { "id": "q1-1-o2", "text": "const" }
+          ],
+          "correctOptionIds": ["q1-1-o2"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+- A single quiz is a file with a list of one. Only this layout is accepted (not a bare list).
+  Quizzes have no `id` or `revision`: the app gives each imported quiz a new id.
+- **The file is not trusted.** It must be under 1 MB and valid JSON, and every quiz must pass the
+  same rules as the admin form (`quizSchema`): a title, at least one question, at least two options
+  per question, at least one correct option, and exactly one for single choice. It must also have
+  known country codes, unique question and option ids, correct answers that point at real options,
+  and option images that are `http` or `https` links.
+- **All or nothing.** If anything is wrong, nothing is imported and every problem found is listed
+  (the first 10, then a count), naming the quiz and the question.
+- Import always adds **new copies**. Importing the same file twice gives two copies. It never
+  overwrites a quiz, and attempts and the leaderboard are not touched.
+- The file holds quiz definitions only, **including the correct answers**, so treat an exported
+  file as admin-only.
+- Export is for all quizzes at once. A save that fails (browser storage full) is reported, but the
+  quizzes may stay in the open tab until it is reloaded.
 
 ### How timing works
 
@@ -172,8 +224,8 @@ answer's time (or `startedAt`) plus `perQuestionSeconds`.
 **With more time**
 
 - Screenshots or a recording of the attend flow on mobile and desktop.
-- JSON export/import of quizzes, an image upload/URL field for answer options in the builder
-  (options already render an `imageUrl` when present), and i18n.
+- An image upload/URL field for answer options in the builder (options already render an
+  `imageUrl` when present), exporting a single quiz, and i18n.
 - Send caught errors to an error-reporting service instead of only the console.
 - Share the Zod quiz schema with the store.
 
