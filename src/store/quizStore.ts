@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { devtools, persist } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
 import seedJson from '../data/seed.json'
 import { recordAnswer } from '../services/answering'
@@ -57,160 +57,183 @@ export type QuizStore = QuizData & QuizActions
  * load there is nothing saved yet, so the seed is used. This is the only code that touches storage.
  */
 export const useQuizStore = create<QuizStore>()(
-  persist(
-    (set, get) => {
-      function replaceAttempt(updated: Attempt) {
-        set((state) => ({
-          attempts: state.attempts.map((attempt) =>
-            attempt.id === updated.id ? updated : attempt,
-          ),
-        }))
-      }
-
-      function findAttemptWithQuiz(attemptId: string) {
-        const { attempts, quizzes } = get()
-        const attempt = attempts.find((candidate) => candidate.id === attemptId)
-        const quiz = quizzes.find((candidate) => candidate.id === attempt?.quizId)
-        return { attempt, quiz }
-      }
-
-      return {
-        ...createSeedData(),
-
-        createQuiz: (input) => {
-          const quiz: Quiz = { ...structuredClone(input), id: createId('quiz'), revision: 0 }
-          set((state) => ({ quizzes: [...state.quizzes, quiz] }))
-          return quiz
-        },
-
-        importQuizzes: (inputs) => {
-          const imported = inputs.map((input): Quiz => ({
-            ...structuredClone(input),
-            id: createId('quiz'),
-            revision: 0,
-          }))
-          set((state) => ({ quizzes: [...state.quizzes, ...imported] }))
-          return imported
-        },
-
-        updateQuiz: (quizId, input) => {
-          set((state) => ({
-            quizzes: state.quizzes.map((quiz) =>
-              quiz.id === quizId
-                ? { ...structuredClone(input), id: quizId, revision: (quiz.revision ?? 0) + 1 }
-                : quiz,
-            ),
-          }))
-        },
-
-        deleteQuiz: (quizId) => {
-          set((state) => ({ quizzes: state.quizzes.filter((quiz) => quiz.id !== quizId) }))
-        },
-
-        startOrResumeAttempt: (quizId, userId) => {
-          const { quizzes, users, attempts } = get()
-          const quiz = quizzes.find((candidate) => candidate.id === quizId)
-          if (!quiz || !users.some((user) => user.id === userId)) {
-            return { ok: false, reason: 'not_found' }
-          }
-
-          const userAttempts = attempts.filter(
-            (attempt) => attempt.quizId === quizId && attempt.userId === userId,
+  devtools(
+    persist(
+      (set, get) => {
+        function replaceAttempt(updated: Attempt, actionName: string) {
+          set(
+            (state) => ({
+              attempts: state.attempts.map((attempt) =>
+                attempt.id === updated.id ? updated : attempt,
+              ),
+            }),
+            false,
+            actionName,
           )
-          const inProgress = userAttempts.find((attempt) => attempt.status === 'in_progress')
-          if (inProgress && !isQuizEdited(inProgress, quiz)) {
-            get().refreshAttempt(inProgress.id)
-            const resumed = get().attempts.find((attempt) => attempt.id === inProgress.id)
-            return resumed ? { ok: true, attempt: resumed } : { ok: false, reason: 'not_found' }
-          }
+        }
 
-          const hasCompleted = userAttempts.some((attempt) => attempt.status === 'completed')
-          if (hasCompleted && !quiz.retakesAllowed)
-            return { ok: false, reason: 'retake_not_allowed' }
+        function findAttemptWithQuiz(attemptId: string) {
+          const { attempts, quizzes } = get()
+          const attempt = attempts.find((candidate) => candidate.id === attemptId)
+          const quiz = quizzes.find((candidate) => candidate.id === attempt?.quizId)
+          return { attempt, quiz }
+        }
 
-          const attempt: Attempt = {
-            id: createId('attempt'),
-            quizId,
-            userId,
-            status: 'in_progress',
-            startedAt: new Date().toISOString(),
-            currentQuestionIndex: 0,
-            answers: [],
-            completedAt: null,
-            score: null,
-            totalQuestions: quiz.questions.length,
-            percentage: null,
-            timeTakenSeconds: null,
-            quizRevision: quiz.revision ?? 0,
-          }
-          // An attempt left over from before the quiz was edited is replaced by the fresh one.
-          set((state) => ({
-            attempts: [...state.attempts.filter((existing) => existing !== inProgress), attempt],
-          }))
-          return { ok: true, attempt }
-        },
+        return {
+          ...createSeedData(),
 
-        refreshAttempt: (attemptId) => {
-          const { attempt, quiz } = findAttemptWithQuiz(attemptId)
-          if (
-            !attempt ||
-            !quiz ||
-            attempt.status !== 'in_progress' ||
-            isQuizEdited(attempt, quiz)
-          ) {
-            return
-          }
-          const settled = settleAttempt(attempt, quiz, Date.now())
-          if (settled !== attempt) replaceAttempt(settled)
-        },
+          createQuiz: (input) => {
+            const quiz: Quiz = { ...structuredClone(input), id: createId('quiz'), revision: 0 }
+            set((state) => ({ quizzes: [...state.quizzes, quiz] }), false, 'createQuiz')
+            return quiz
+          },
 
-        submitAnswer: (attemptId, questionId, optionIds) => {
-          const { attempt, quiz } = findAttemptWithQuiz(attemptId)
-          if (attempt && quiz) {
-            const updated = recordAnswer(attempt, quiz, questionId, optionIds, Date.now())
-            if (updated !== attempt) replaceAttempt(updated)
-          }
-          return getCurrentQuestion(get(), attemptId)
-        },
+          importQuizzes: (inputs) => {
+            const imported = inputs.map((input): Quiz => ({
+              ...structuredClone(input),
+              id: createId('quiz'),
+              revision: 0,
+            }))
+            set((state) => ({ quizzes: [...state.quizzes, ...imported] }), false, 'importQuizzes')
+            return imported
+          },
 
-        completeAttempt: (attemptId) => {
-          get().refreshAttempt(attemptId)
-          const { attempt, quiz } = findAttemptWithQuiz(attemptId)
-          if (!attempt) return undefined
-          if (attempt.status === 'completed' || !quiz) return buildResult(attempt)
+          updateQuiz: (quizId, input) => {
+            set(
+              (state) => ({
+                quizzes: state.quizzes.map((quiz) =>
+                  quiz.id === quizId
+                    ? { ...structuredClone(input), id: quizId, revision: (quiz.revision ?? 0) + 1 }
+                    : quiz,
+                ),
+              }),
+              false,
+              'updateQuiz',
+            )
+          },
 
-          const nowMs = Date.now()
-          const { overallEndsAtMs } = getDeadlines(attempt, quiz)
-          const finalized = finalizeAttempt(
-            attempt,
-            quiz,
-            Math.min(nowMs, overallEndsAtMs ?? nowMs),
-          )
-          replaceAttempt(finalized)
-          return buildResult(finalized)
-        },
+          deleteQuiz: (quizId) => {
+            set(
+              (state) => ({ quizzes: state.quizzes.filter((quiz) => quiz.id !== quizId) }),
+              false,
+              'deleteQuiz',
+            )
+          },
 
-        resetData: () => set(createSeedData()),
-      }
-    },
-    {
-      name: QUIZ_STORAGE_KEY,
-      version: 1,
-      // localStorage is outside our control: it can be cleared halfway, edited by hand, or written
-      // by an older version of the app. Every record is checked, because one bad record would
-      // otherwise crash every screen that lists it. If anything fails, the seed is used instead.
-      merge: (persisted, current) => {
-        const parsed = quizDataSchema.safeParse(persisted)
-        return parsed.success ? { ...current, ...parsed.data } : current
+          startOrResumeAttempt: (quizId, userId) => {
+            const { quizzes, users, attempts } = get()
+            const quiz = quizzes.find((candidate) => candidate.id === quizId)
+            if (!quiz || !users.some((user) => user.id === userId)) {
+              return { ok: false, reason: 'not_found' }
+            }
+
+            const userAttempts = attempts.filter(
+              (attempt) => attempt.quizId === quizId && attempt.userId === userId,
+            )
+            const inProgress = userAttempts.find((attempt) => attempt.status === 'in_progress')
+            if (inProgress && !isQuizEdited(inProgress, quiz)) {
+              get().refreshAttempt(inProgress.id)
+              const resumed = get().attempts.find((attempt) => attempt.id === inProgress.id)
+              return resumed ? { ok: true, attempt: resumed } : { ok: false, reason: 'not_found' }
+            }
+
+            const hasCompleted = userAttempts.some((attempt) => attempt.status === 'completed')
+            if (hasCompleted && !quiz.retakesAllowed)
+              return { ok: false, reason: 'retake_not_allowed' }
+
+            const attempt: Attempt = {
+              id: createId('attempt'),
+              quizId,
+              userId,
+              status: 'in_progress',
+              startedAt: new Date().toISOString(),
+              currentQuestionIndex: 0,
+              answers: [],
+              completedAt: null,
+              score: null,
+              totalQuestions: quiz.questions.length,
+              percentage: null,
+              timeTakenSeconds: null,
+              quizRevision: quiz.revision ?? 0,
+            }
+            // An attempt left over from before the quiz was edited is replaced by the fresh one.
+            set(
+              (state) => ({
+                attempts: [
+                  ...state.attempts.filter((existing) => existing !== inProgress),
+                  attempt,
+                ],
+              }),
+              false,
+              'startOrResumeAttempt/start',
+            )
+            return { ok: true, attempt }
+          },
+
+          refreshAttempt: (attemptId) => {
+            const { attempt, quiz } = findAttemptWithQuiz(attemptId)
+            if (
+              !attempt ||
+              !quiz ||
+              attempt.status !== 'in_progress' ||
+              isQuizEdited(attempt, quiz)
+            ) {
+              return
+            }
+            const settled = settleAttempt(attempt, quiz, Date.now())
+            if (settled !== attempt) replaceAttempt(settled, 'refreshAttempt')
+          },
+
+          submitAnswer: (attemptId, questionId, optionIds) => {
+            const { attempt, quiz } = findAttemptWithQuiz(attemptId)
+            if (attempt && quiz) {
+              const updated = recordAnswer(attempt, quiz, questionId, optionIds, Date.now())
+              if (updated !== attempt) replaceAttempt(updated, 'submitAnswer')
+            }
+            return getCurrentQuestion(get(), attemptId)
+          },
+
+          completeAttempt: (attemptId) => {
+            get().refreshAttempt(attemptId)
+            const { attempt, quiz } = findAttemptWithQuiz(attemptId)
+            if (!attempt) return undefined
+            if (attempt.status === 'completed' || !quiz) return buildResult(attempt)
+
+            const nowMs = Date.now()
+            const { overallEndsAtMs } = getDeadlines(attempt, quiz)
+            const finalized = finalizeAttempt(
+              attempt,
+              quiz,
+              Math.min(nowMs, overallEndsAtMs ?? nowMs),
+            )
+            replaceAttempt(finalized, 'completeAttempt')
+            return buildResult(finalized)
+          },
+
+          resetData: () => set(createSeedData(), false, 'resetData'),
+        }
       },
-      // Only the data is saved, never the actions.
-      partialize: ({ countries, users, quizzes, attempts }): QuizData => ({
-        countries,
-        users,
-        quizzes,
-        attempts,
-      }),
-    },
+      {
+        name: QUIZ_STORAGE_KEY,
+        version: 1,
+        // localStorage is outside our control: it can be cleared halfway, edited by hand, or written
+        // by an older version of the app. Every record is checked, because one bad record would
+        // otherwise crash every screen that lists it. If anything fails, the seed is used instead.
+        merge: (persisted, current) => {
+          const parsed = quizDataSchema.safeParse(persisted)
+          return parsed.success ? { ...current, ...parsed.data } : current
+        },
+        // Only the data is saved, never the actions.
+        partialize: ({ countries, users, quizzes, attempts }): QuizData => ({
+          countries,
+          users,
+          quizzes,
+          attempts,
+        }),
+      },
+    ),
+    // Local only: shows every action and the state after it in the Redux DevTools extension.
+    { name: 'quizStore', enabled: import.meta.env.DEV && import.meta.env.MODE !== 'test' },
   ),
 )
 

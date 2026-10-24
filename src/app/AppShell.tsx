@@ -1,6 +1,8 @@
 import type { ComponentType, ReactNode } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useApplyTheme } from '../hooks/useApplyTheme'
+import { useQuizStore } from '../store/quizStore'
+import { useSessionStore } from '../store/sessionStore'
 
 /** Where the controls are drawn: a light header on phones, the dark side panel on desktop. */
 export type ShellSurface = 'light' | 'panel'
@@ -58,6 +60,10 @@ export function AppShell({
   // "/admin/" and "/admin" are the same page.
   const currentPath = useLocation().pathname.replace(/(.)\/$/, '$1')
   const AreaIcon = areaLink.Icon
+  const userId = useSessionStore((state) => state.userId)
+  const isAdmin = useQuizStore(
+    (state) => state.users.find((user) => user.id === userId)?.role === 'admin',
+  )
 
   return (
     <div className="min-h-dvh lg:flex lg:gap-6 lg:p-6">
@@ -113,6 +119,7 @@ export function AppShell({
               )
             })}
             <div className="mt-auto hidden flex-col gap-2 lg:flex">
+            {isAdmin && 
               <Link
                 to={areaLink.to}
                 className="inline-flex min-h-11 items-center gap-3 rounded-2xl px-3.5 font-semibold text-panel-muted no-underline hover:bg-white/10 hover:text-panel-fg"
@@ -120,6 +127,7 @@ export function AppShell({
                 <AreaIcon size={18} />
                 {areaLink.label}
               </Link>
+            }
               {renderControls('panel')}
             </div>
           </nav>

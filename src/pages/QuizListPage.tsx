@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { QuizGrid, QuizGridSkeleton } from '../components/quiz/QuizGrid'
 import { ResumeBanner } from '../components/quiz/ResumeBanner'
 import { Button } from '../components/ui/Button'
@@ -26,7 +26,9 @@ function progressLine(quizzes: QuizSummary[]): string {
 export function QuizListPage() {
   const userId = useSessionStore((state) => state.userId)
   const quizData = useQuizData()
-  const [country, setCountry] = useState('')
+  const user = quizData.users.find((user) => user.id === userId)
+
+  const [country, setCountry] = useState(() => user?.country ?? "")
   const countryOptions = [
     { value: ALL, label: 'All' },
     ...quizData.countries.map((countryOption) => ({
@@ -43,6 +45,17 @@ export function QuizListPage() {
     ?.map((quiz) => ({ quiz, attempt: getInProgressAttempt(quizData, quiz.id, userId) }))
     .find((entry) => entry.attempt !== undefined)
   const rest = quizzes?.filter((quiz) => quiz.id !== resumable?.quiz.id) ?? []
+
+
+  
+  useEffect(() => {
+
+    if (userId && user?.country) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCountry(user.country)
+    }
+  }, [user?.country, userId])
+
 
   return (
     <section aria-labelledby="quiz-list-heading" className="flex flex-col gap-6 sm:gap-8">

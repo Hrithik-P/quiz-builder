@@ -58,7 +58,7 @@ export function QuizForm({ initial, countries, submitLabel, onSubmit }: QuizForm
     shouldFocusError: false,
   })
   const { control, formState, getValues, setFocus } = form
-  const { errors, isDirty, submitCount } = formState
+  const { errors, isDirty, submitCount , isValid} = formState
   const questions = useFieldArray({ control, name: 'questions' })
   const countriesLabelId = useId()
 
@@ -85,6 +85,7 @@ export function QuizForm({ initial, countries, submitLabel, onSubmit }: QuizForm
 
   function handleValid(draft: QuizDraft) {
     guard.allowLeave()
+    if(!isDirty) return; // Prevent submission if there are no changes
     onSubmit(draft)
   }
 
@@ -286,7 +287,8 @@ export function QuizForm({ initial, countries, submitLabel, onSubmit }: QuizForm
           <Button asChild variant="secondary">
             <Link to="/admin">Cancel</Link>
           </Button>
-          <Button type="submit">{submitLabel}</Button>
+          <Button type="submit" disabled={!isDirty || !isValid}
+          >{submitLabel}</Button>
         </div>
 
         <ConfirmDialog

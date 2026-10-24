@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { devtools, persist } from 'zustand/middleware'
 
 /** Bump the suffix if the stored shape changes. */
 export const SESSION_STORAGE_KEY = 'quiz-platform:session:v1'
@@ -23,20 +23,24 @@ function readSavedUserId(value: unknown): string | undefined {
  * saved in localStorage like the rest of the app's data.
  */
 export const useSessionStore = create<SessionState>()(
-  persist(
-    (set) => ({
-      userId: DEFAULT_USER_ID,
-      setUserId: (userId) => set({ userId }),
-    }),
-    {
-      name: SESSION_STORAGE_KEY,
-      version: 1,
-      partialize: ({ userId }) => ({ userId }),
-      // Anything unreadable is ignored, so a corrupted value falls back to the default user.
-      merge: (persisted, current) => ({
-        ...current,
-        userId: readSavedUserId(persisted) ?? current.userId,
+  devtools(
+    persist(
+      (set) => ({
+        userId: DEFAULT_USER_ID,
+        setUserId: (userId) => set({ userId }, false, 'setUserId'),
       }),
-    },
+      {
+        name: SESSION_STORAGE_KEY,
+        version: 1,
+        partialize: ({ userId }) => ({ userId }),
+        // Anything unreadable is ignored, so a corrupted value falls back to the default user.
+        merge: (persisted, current) => ({
+          ...current,
+          userId: readSavedUserId(persisted) ?? current.userId,
+        }),
+      },
+    ),
+    // Local only: shows the current user in the Redux DevTools extension.
+    { name: 'sessionStore', enabled: import.meta.env.DEV && import.meta.env.MODE !== 'test' },
   ),
 )
